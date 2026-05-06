@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShiftMD v2.0 - Uputstvo</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="/" class="nav-brand">🩺 ShiftMD v2.0</a>
+      <ul class="nav-links">
+        <li><a href="/" class="nav-link">🏠 Početna</a></li>
+        <li><a href="/o-sistemu" class="nav-link">ℹ️ O sistemu</a></li>
+        <li><a href="/uputstvo" class="nav-link active">📖 Uputstvo</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="info-page">
+    <div class="card">
+      <h1>📖 Uputstvo za korišćenje</h1>
+      <p style="color: #6b7280; font-size: 16px; margin-bottom: 20px;">
+        Korak po korak vodič za generisanje rasporeda dežurstava
+      </p>
+
+      <!-- Korak 1 -->
+      <h2>1️⃣ Priprema Excel fajla sa lekarima</h2>
+      <p>Ovo je najvažniji korak. Excel fajl mora imati <strong>tačno određene kolone</strong> sa ispravnim nazivima:</p>
+
+      <table class="info-table">
+        <thead>
+          <tr>
+            <th>Kolona</th>
+            <th>Obavezno</th>
+            <th>Opis</th>
+            <th>Dozvoljene vrednosti</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Ime i prezime</strong></td>
+            <td>✅ Da</td>
+            <td>Puno ime i prezime lekara</td>
+            <td>Bilo koji tekst (npr. Dr Marko Marković)</td>
+          </tr>
+          <tr>
+            <td><strong>Starešinstvo</strong></td>
+            <td>✅ Da</td>
+            <td>Broj godina staža. Manji broj = mlađi lekar = veći prioritet za dežurstva</td>
+            <td>Broj (npr. 5, 10, 15)</td>
+          </tr>
+          <tr>
+            <td><strong>Može biti glavni</strong></td>
+            <td>✅ Da</td>
+            <td>Da li lekar može biti glavni dežurni? (mora biti specijalista)</td>
+            <td><strong>DA</strong> ili <strong>NE</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Tip zaposlenog</strong></td>
+            <td>✅ Da</td>
+            <td>Vrsta lekara</td>
+            <td><strong>specijalista</strong> ili <strong>specijalizant</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Udeo dežurstva</strong></td>
+            <td>✅ Da</td>
+            <td>Koliki deo punog dežurstva lekar može da pokrije</td>
+            <td><strong>celo, polovina, trećina, četvrtina, osmina</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Ne može</strong></td>
+            <td>❌ Ne</td>
+            <td>Datumi kada lekar NE MOŽE da dežura. Više datuma odvojiti zarezom.</td>
+            <td>Npr. 05-06-2026, 15-06-2026</td>
+          </tr>
+          <tr>
+            <td><strong>Želi da dežura</strong></td>
+            <td>❌ Ne</td>
+            <td>Datumi kada lekar ŽELI da dežura. Sistem daje prioritet ovim željama.</td>
+            <td>Npr. 01-06-2026, 20-06-2026</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="highlight-box-green">
+        <h3>⚠️ Važne napomene:</h3>
+        <ul>
+          <li>Sve kolone su <strong>obavezne</strong> osim "Ne može" i "Želi da dežura"</li>
+          <li>Datumi moraju biti u formatu <strong>DD-MM-GGGG</strong> (npr. 15-06-2026)</li>
+          <li>Za udeo koristite <strong>isključivo tekstualne oznake</strong>: celo, polovina, trećina, četvrtina, osmina</li>
+          <li>Ne koristite razlomke (1/1, 1/2) jer ih Excel može pretvoriti u datume!</li>
+          <li>Samo <strong>specijalisti</strong> mogu imati "DA" u koloni "Može biti glavni"</li>
+        </ul>
+      </div>
+
+      <!-- Primer -->
+      <h2>📋 Primer Excel fajla</h2>
+      <p>Preuzmite gotov primer sa 16 lekara koji možete koristiti za testiranje:</p>
+      <p>
+        <a href="/demo-lekari.xlsx" class="btn-download">📥 Preuzmi demo Excel fajl (16 lekara)</a>
+      </p>
+      <p style="color: #6b7280; font-size: 13px;">
+        Primer sadrži 8 specijalista i 8 specijalizanata sa različitim udelima, datumima nedostupnosti i željama.
+      </p>
+
+      <!-- Primer tabele -->
+      <table class="info-table">
+        <thead>
+          <tr>
+            <th>Ime i prezime</th>
+            <th>Starešinstvo</th>
+            <th>Može biti glavni</th>
+            <th>Tip zaposlenog</th>
+            <th>Udeo dežurstva</th>
+            <th>Ne može</th>
+            <th>Želi da dežura</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Dr Ana Antić</td>
+            <td>15</td>
+            <td>DA</td>
+            <td>specijalista</td>
+            <td>celo</td>
+            <td></td>
+            <td>01-06-2026, 15-06-2026</td>
+          </tr>
+          <tr>
+            <td>Dr Marko Marković</td>
+            <td>12</td>
+            <td>DA</td>
+            <td>specijalista</td>
+            <td>celo</td>
+            <td>05-06-2026</td>
+            <td>10-06-2026</td>
+          </tr>
+          <tr>
+            <td>Dr Vesna Vesnić</td>
+            <td>1</td>
+            <td>NE</td>
+            <td>specijalizant</td>
+            <td>osmina</td>
+            <td>06-06-2026</td>
+            <td>13-06-2026</td>
+          </tr>
+          <tr>
+            <td colspan="7" style="text-align: center; color: #6b7280;">... i još 13 lekara u demo fajlu</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Korak 2 -->
+      <h2>2️⃣ Popunjavanje forme na početnoj strani</h2>
+      <ol class="step-list">
+        <li>
+          <strong>Naziv ustanove</strong><br>
+          Unesite naziv bolnice ili doma zdravlja. Ovo će se pojaviti u zaglavlju izveštaja.
+        </li>
+        <li>
+          <strong>Mesec i Godina</strong><br>
+          Izaberite mesec i godinu za koje pravite raspored. Kalendar će se automatski prikazati.
+        </li>
+        <li>
+          <strong>Broj dežurnih po danu</strong><br>
+          Koliko celih dežurstava (1/1) treba popuniti svakog dana. Npr. 5 znači da svaki dan treba 5 lekara sa ukupnim udelom 5.0.
+        </li>
+        <li>
+          <strong>Čekboks za specijaliste</strong><br>
+          Ako je čekirano: dozvoljeno je manje od 50% specijalista, ali glavni dežurni je obavezan.<br>
+          Ako nije čekirano: minimum 50% specijalista u svakom dežurstvu (strožije pravilo).
+        </li>
+        <li>
+          <strong>Kalendar</strong><br>
+          Kliknite na datume kada treba organizovati dežurstva. Izabrani datumi postaju plavi (vikendi crveni).
+        </li>
+        <li>
+          <strong>Excel fajl</strong><br>
+          Otpremite pripremljeni Excel fajl sa spiskom lekara.
+        </li>
+      </ol>
+
+      <!-- Korak 3 -->
+      <h2>3️⃣ Generisanje i preuzimanje</h2>
+      <ol class="step-list">
+        <li>
+          <strong>Kliknite "Generiši raspored"</strong><br>
+          Sistem će obraditi podatke i prikazati rezultat. U konzoli možete pratiti detaljan log.
+        </li>
+        <li>
+          <strong>Pregledajte rezultat</strong><br>
+          Tekstualni prikaz rasporeda se pojavljuje ispod forme.
+        </li>
+        <li>
+          <strong>Preuzmite Excel</strong><br>
+          Kliknite na dugme "Preuzmi Excel raspored". Fajl će biti sačuvan u folderu "rasporedi".
+        </li>
+      </ol>
+
+      <!-- Output -->
+      <h2>📊 Šta sadrži output Excel?</h2>
+      <table class="info-table">
+        <thead>
+          <tr>
+            <th>Sheet</th>
+            <th>Sadržaj</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Raspored</strong></td>
+            <td>Formatiran prikaz sa statistikom, zaglavljem, svim dežurstvima po datumima. Glavni dežurni označeni sa ★.</td>
+          </tr>
+          <tr>
+            <td><strong>Tabelarni pregled</strong></td>
+            <td>Tabela sa kolonama: Datum, Dan, Dežurstvo, Ime, Tip, Udeo, Glavni. Auto-fit širine kolona.</td>
+          </tr>
+          <tr>
+            <td><strong>Statistika</strong></td>
+            <td>Pregled po lekaru: opterećenje, broj dežurstava, vikenda, obojeno po intenzitetu.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- CTA -->
+      <div style="text-align: center; margin-top: 40px; padding: 30px; background: #f0f4ff; border-radius: 12px;">
+        <h2 style="border: none; margin-top: 0;">🚀 Spremni da počnete?</h2>
+        <p style="margin-bottom: 20px;">Preuzmite demo Excel, otpremite ga na početnoj strani i testirajte sistem.</p>
+        <a href="/" class="btn-download">⚡ Idi na početnu stranu</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

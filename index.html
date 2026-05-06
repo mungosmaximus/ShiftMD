@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShiftMD v2.0 - Raspored dežurstava</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <!-- NAVIGACIONI MENI -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="/" class="nav-brand">🩺 ShiftMD v2.0</a>
+      <ul class="nav-links">
+        <li><a href="/" class="nav-link active">🏠 Početna</a></li>
+        <li><a href="/o-sistemu" class="nav-link">ℹ️ O sistemu</a></li>
+        <li><a href="/uputstvo" class="nav-link">📖 Uputstvo</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1>ShiftMD v2.0</h1>
+    <p style="text-align: center; color: #6b7280; margin-top: -10px; margin-bottom: 20px; font-size: 14px;">
+      Sistem za raspored dežurstava lekara
+    </p>
+
+    <form id="form" class="card">
+      <input
+        type="text"
+        id="hospital"
+        name="hospital"
+        placeholder="Naziv ustanove"
+        required
+      >
+
+      <div class="row">
+        <select id="month" name="month" required>
+          <option value="">Mesec</option>
+          <option value="1">Januar</option>
+          <option value="2">Februar</option>
+          <option value="3">Mart</option>
+          <option value="4">April</option>
+          <option value="5">Maj</option>
+          <option value="6">Jun</option>
+          <option value="7">Jul</option>
+          <option value="8">Avgust</option>
+          <option value="9">Septembar</option>
+          <option value="10">Oktobar</option>
+          <option value="11">Novembar</option>
+          <option value="12">Decembar</option>
+        </select>
+
+        <select id="year" name="year" required>
+          <option value="">Godina</option>
+          <!-- Godine se dinamički dodaju putem JavaScript-a -->
+      </select>
+      </div>
+
+      <div class="form-group">
+        <label for="dutyStaffCount">Broj dežurnih po danu:</label>
+        <input
+          type="number"
+          id="dutyStaffCount"
+          name="dutyStaffCount"
+          value="1"
+          min="1"
+          max="10"
+          required
+        >
+        <small>Koliko ukupno dežurstava (1/1) treba popuniti po danu</small>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            id="allowLessSpecialists"
+            name="allowLessSpecialists"
+          >
+          <span>Dozvoli da bude manje od 50% specijalista među dežurnima?</span>
+        </label>
+        <small>
+          Ako je čekirano: specijalista će obavezno biti glavni dežurni za taj dan, 
+          ali ukupan udeo specijalista može biti manji od 50%.<br>
+          Ako NIJE čekirano: najmanje 50% dežurnih moraju biti specijalisti.
+        </small>
+      </div>
+
+      <div class="calendar-header">
+        <div>Pon</div>
+        <div>Uto</div>
+        <div>Sre</div>
+        <div>Čet</div>
+        <div>Pet</div>
+        <div>Sub</div>
+        <div>Ned</div>
+      </div>
+
+      <div id="calendar" class="calendar">
+        <p style="grid-column: 1 / -1; text-align: center; color: #6b7280;">
+          Izaberite mesec i godinu da biste videli kalendar
+        </p>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="form-group">
+        <label for="excel">📂 Otpremite Excel fajl sa spiskom lekara:</label>
+        <input type="file" id="excel" name="excel" accept=".xlsx,.xls" required>
+        <small>Dozvoljeni formati: .xlsx, .xls | <a href="/demo-lekari.xlsx" style="color: #2563eb;">📥 Preuzmi primer Excel fajla</a></small>
+      </div>
+
+      <div class="spacer-small"></div>
+
+      <button type="submit" id="submitBtn">
+        ⚡ Generiši raspored
+      </button>
+    </form>
+
+    <div id="status" class="status hidden"></div>
+    <div id="result" class="card result"></div>
+
+    <button id="downloadBtn" class="download-btn hidden">
+      📥 Preuzmi Excel raspored
+    </button>
+
+    <p style="text-align: center; color: #9ca3af; font-size: 11px; margin-top: 20px;">
+      ShiftMD v2.0 &copy; 2026 - Sistem za raspored dežurstava
+    </p>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

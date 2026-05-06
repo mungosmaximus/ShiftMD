@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShiftMD v2.0 - O sistemu</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="/" class="nav-brand">🩺 ShiftMD v2.0</a>
+      <ul class="nav-links">
+        <li><a href="/" class="nav-link">🏠 Početna</a></li>
+        <li><a href="/o-sistemu" class="nav-link active">ℹ️ O sistemu</a></li>
+        <li><a href="/uputstvo" class="nav-link">📖 Uputstvo</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="info-page">
+    <div class="card">
+      <h1>ℹ️ O sistemu ShiftMD</h1>
+      <p style="color: #6b7280; font-size: 16px; margin-bottom: 20px;">
+        Inteligentni sistem za pravednu raspodelu dežurstava sa fokusom na sprečavanje burnout-a
+      </p>
+
+      <!-- Misija -->
+      <div class="highlight-box">
+        <h3>🎯 Naša misija</h3>
+        <p>
+          ShiftMD je stvoren sa jednim ciljem: <strong>eliminisati nepravdu u raspodeli dežurstava</strong> 
+          i zaštititi zdravstvene radnike od prekomernog opterećenja. Verujemo da pravedan raspored 
+          direktno utiče na kvalitet nege pacijenata i zadovoljstvo lekara.
+        </p>
+      </div>
+
+      <!-- Feature grid -->
+      <h2>✨ Ključne mogućnosti</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="icon">⚖️</div>
+          <h4>Pravedna raspodela</h4>
+          <p>Napredni algoritam osigurava da svi lekari dobiju približno isto opterećenje</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🛡️</div>
+          <h4>Burnout zaštita</h4>
+          <p>Minimum 2 dana razmaka, limitirani vikendi, maksimalno opterećenje po lekaru</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">⭐</div>
+          <h4>Poštovanje želja</h4>
+          <p>Lekari mogu naznačiti datume kada žele da dežuraju - sistem im daje prioritet</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🚫</div>
+          <h4>"Ne može" se poštuje</h4>
+          <p>Datumi kada lekar ne može da dežura se apsolutno poštuju, bez izuzetaka</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">👑</div>
+          <h4>Glavni dežurni</h4>
+          <p>Automatski dodeljuje specijalistu koji može biti glavni za svako dežurstvo</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📊</div>
+          <h4>Detaljna statistika</h4>
+          <p>Max, prosek i min opterećenje, broj dežurstava i vikenda za svakog lekara</p>
+        </div>
+      </div>
+
+      <!-- Logika rasterećenja -->
+      <h2>🧠 Logika rasterećenja i sprečavanja burnout-a</h2>
+      
+      <div class="highlight-box-green">
+        <h3>🛡️ Burnout prevencija - srce sistema</h3>
+        <p>
+          ShiftMD koristi sofisticirani <strong>scoring algoritam</strong> koji uzima u obzir 
+          <strong>9 različitih faktora</strong> kako bi doneo najpravedniju odluku o dodeli dežurstva.
+        </p>
+      </div>
+
+      <h3>📐 Kako funkcioniše scoring?</h3>
+      <p>
+        Svaki lekar dobija numerički "skor" (trošak dodele). <strong>Manji skor = veća šansa da dobije dežurstvo.</strong>
+        Sistem se trudi da svi lekari imaju približno isti skor, čime se postiže prirodna ravnoteža.
+      </p>
+
+      <h3>🔢 Faktori scoringa (9 nivoa zaštite):</h3>
+      <ol>
+        <li>
+          <strong>Ukupno opterećenje (×50)</strong> - Najvažniji faktor. Što više dežurstava lekar već ima, 
+          to mu je veći skor i manja šansa za novo dežurstvo.
+        </li>
+        <li>
+          <strong>Broj dežurstava sa kvadratnom kaznom</strong> - Za prvih 3 dežurstva normalna kazna, 
+          za svako sledeće eksponencijalno raste (4. dežurstvo: +2, 5.: +8, 6.: +18...).
+        </li>
+        <li>
+          <strong>Vikend zaštita (×25)</strong> - Vikend dežurstva su posebno "kažnjena". 
+          Sistem proverava da li je lekar radio vikend u poslednjih 14 dana.
+        </li>
+        <li>
+          <strong>Gustina dežurstava</strong> - Prati prosečan razmak između svih dežurstava. 
+          Idealni razmak je 4+ dana. Manji razmak = veća kazna.
+        </li>
+        <li>
+          <strong>Razmak od poslednjeg (×5 bonus/dan)</strong> - Veći razmak = manji skor. 
+          Minimum 2 dana razmaka se strogo poštuje.
+        </li>
+        <li>
+          <strong>Starešinstvo (kategorijski ×20)</strong> - 5 kategorija. Mlađi lekari (niže starešinstvo) 
+          imaju prednost pri dodeli.
+        </li>
+        <li>
+          <strong>Poređenje sa prosekom</strong> - Lekari iznad proseka opterećenja dobijaju dodatnu kaznu, 
+          oni ispod proseka dobijaju bonus.
+        </li>
+        <li>
+          <strong>Udeo dežurstva</strong> - Bonus ako udeo lekara tačno odgovara "rupici" u rasporedu 
+          (npr. lekar sa 1/4 idealno popunjava 0.25).
+        </li>
+        <li>
+          <strong>Želje (bonus -30)</strong> - Lekari koji su izrazili želju za određeni datum 
+          dobijaju značajan bonus na skor.
+        </li>
+      </ol>
+
+      <h3>📊 Maksimalni limiti:</h3>
+      <ul>
+        <li><strong>Max dana dežurstva:</strong> proporcionalno broju lekara + 2 dana tolerancije</li>
+        <li><strong>Max opterećenje:</strong> 30% ukupnog kapaciteta po lekaru</li>
+        <li><strong>Max vikenda:</strong> proporcionalno broju vikend dana i broju lekara + 1</li>
+        <li><strong>Min razmak:</strong> 2 dana između dežurstava (apsolutno pravilo)</li>
+      </ul>
+
+      <h2>🔄 Proces dodele (korak po korak)</h2>
+      <ol class="step-list">
+        <li>
+          <strong>Glavni dežurni</strong><br>
+          Prvo se dodeljuje specijalista koji može biti glavni. Prednost ima onaj ko je tražio taj datum.
+        </li>
+        <li>
+          <strong>Želje</strong><br>
+          Zatim se dodeljuju lekari koji su izrazili želju za taj datum, sortirani po višem starešinstvu.
+        </li>
+        <li>
+          <strong>Popuna</strong><br>
+          Ostatak se popunjava po scoringu. Ako lekar ima udeo manji od 1/1, sistem odmah traži 
+          sledećeg da popuni ostatak.
+        </li>
+        <li>
+          <strong>Validacija</strong><br>
+          Provera da li svako dežurstvo ima glavnog i (opciono) minimum 50% specijalista.
+        </li>
+      </ol>
+
+      <!-- CTA -->
+      <div style="text-align: center; margin-top: 40px; padding: 30px; background: #f0f4ff; border-radius: 12px;">
+        <h2 style="border: none; margin-top: 0;">🚀 Spremni za pravednije dežurstvo?</h2>
+        <p style="margin-bottom: 20px;">Vratite se na početnu stranu i generišite svoj prvi raspored.</p>
+        <a href="/" class="btn-download">⚡ Generiši raspored</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
