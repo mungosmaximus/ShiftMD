@@ -1,4 +1,4 @@
-// ShiftMD v2.0 - Server za generisanje rasporeda dežurstava
+// ShiftMD v3.0 - Server za generisanje rasporeda dežurstava
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
@@ -31,23 +31,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/rasporedi", express.static(rasporediDir));
 
 // ===== RUTE ZA STRANICE =====
-
-// Početna strana
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// Strana "O sistemu"
 app.get("/o-sistemu", (req, res) => {
   res.sendFile(path.join(__dirname, "o-sistemu.html"));
 });
 
-// Strana "Uputstvo"
 app.get("/uputstvo", (req, res) => {
   res.sendFile(path.join(__dirname, "uputstvo.html"));
 });
 
-// Preuzimanje demo Excel fajla
 app.get("/demo-lekari.xlsx", (req, res) => {
   const demoPath = path.join(__dirname, "demo-lekari.xlsx");
   if (fs.existsSync(demoPath)) {
@@ -64,8 +59,6 @@ app.get("/demo-lekari.xlsx", (req, res) => {
 });
 
 // ===== API RUTE =====
-
-// Preuzimanje generisanog Excel fajla
 app.get("/download/:filename", (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(rasporediDir, filename);
@@ -89,7 +82,6 @@ app.get("/download/:filename", (req, res) => {
   fileStream.pipe(res);
 });
 
-// Generisanje rasporeda
 app.post("/generate", upload.single("excel"), async (req, res) => {
   try {
     const { hospital, month, year, dutyDates, dutyStaffCount, allowLessSpecialists } = req.body;
@@ -114,7 +106,7 @@ app.post("/generate", upload.single("excel"), async (req, res) => {
     
     console.log("");
     console.log("═".repeat(60));
-    console.log("🩺 ShiftMD v2.0 - GENERISANJE RASPOREDA");
+    console.log("🩺 ShiftMD v3.0 - GENERISANJE RASPOREDA");
     console.log("═".repeat(60));
     console.log(`   Ustanova: ${hospital} | ${month}/${year}`);
     console.log(`   Datuma: ${dates.length} | Dežurstava/dan: ${staffCount}`);
@@ -200,12 +192,9 @@ app.post("/generate", upload.single("excel"), async (req, res) => {
   }
 });
 
-// Lista svih generisanih rasporeda
 app.get("/rasporedi-list", (req, res) => {
   try {
-    if (!fs.existsSync(rasporediDir)) {
-      return res.json([]);
-    }
+    if (!fs.existsSync(rasporediDir)) return res.json([]);
     
     const files = fs.readdirSync(rasporediDir)
       .filter(f => f.endsWith(".xlsx"))
@@ -223,15 +212,11 @@ app.get("/rasporedi-list", (req, res) => {
       })
       .sort((a, b) => new Date(b.created) - new Date(a.created));
     
-    console.log(`📋 ShiftMD: Lista rasporeda - ${files.length} fajlova`);
     res.json(files);
   } catch (err) {
-    console.error("ShiftMD: Greška pri čitanju foldera:", err);
-    res.status(500).json({ error: "Greška pri čitanju foldera sa rasporedima." });
+    res.status(500).json({ error: "Greška pri čitanju foldera." });
   }
 });
-
-// ===== HELPER FUNKCIJE =====
 
 function formatFileSize(bytes) {
   if (!bytes || bytes === 0) return '0 B';
@@ -240,35 +225,24 @@ function formatFileSize(bytes) {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
 
-// ===== POKRETANJE SERVERA =====
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("");
   console.log("╔══════════════════════════════════════════════╗");
-  console.log("║        🩺 ShiftMD v2.0 - POKRENUT           ║");
+  console.log("║        🩺 ShiftMD v3.0 - POKRENUT           ║");
   console.log("╠══════════════════════════════════════════════╣");
   console.log(`║  URL: http://localhost:${PORT}                  ║`);
   console.log("║  /              - Početna strana            ║");
   console.log("║  /o-sistemu     - O sistemu                 ║");
   console.log("║  /uputstvo      - Uputstvo                  ║");
+  console.log("║  Jezici: srpski, engleski                  ║");
   console.log("║  Udeli: celo, polovina, trećina,            ║");
   console.log("║         četvrtina, osmina                   ║");
-  console.log("║  Scoring: napredni, burnout zaštita         ║");
   console.log("╚══════════════════════════════════════════════╝");
   console.log("");
-  console.log("▶  Pritisni Ctrl+C za zaustavljanje servera");
-  console.log("");
 });
 
-// Graceful shutdown
 process.on("SIGINT", () => {
-  console.log("");
-  console.log("🛑 ShiftMD: Server se zaustavlja...");
-  process.exit(0);
-});
-
-process.on("SIGTERM", () => {
   console.log("");
   console.log("🛑 ShiftMD: Server se zaustavlja...");
   process.exit(0);

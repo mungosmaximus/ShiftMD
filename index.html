@@ -3,103 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ShiftMD v2.0 - Raspored dežurstava</title>
+  <title>ShiftMD v3.0 - Raspored dežurstava</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
-  <!-- NAVIGACIONI MENI -->
+  <!-- NAVIGACIJA -->
   <nav class="navbar">
     <div class="nav-container">
-      <a href="/" class="nav-brand">🩺 ShiftMD v2.0</a>
+      <a href="/" class="nav-brand" data-key="nav_brand">🩺 ShiftMD v3.0</a>
       <ul class="nav-links">
-        <li><a href="/" class="nav-link active">🏠 Početna</a></li>
-        <li><a href="/o-sistemu" class="nav-link">ℹ️ O sistemu</a></li>
-        <li><a href="/uputstvo" class="nav-link">📖 Uputstvo</a></li>
+        <li><a href="/" class="nav-link active" data-key="nav_home">🏠 Početna</a></li>
+        <li><a href="/o-sistemu" class="nav-link" data-key="nav_about">ℹ️ O sistemu</a></li>
+        <li><a href="/uputstvo" class="nav-link" data-key="nav_guide">📖 Uputstvo</a></li>
+        <li class="lang-divider"></li>
+        <li><a href="#" class="nav-link lang-switch active-lang" data-lang="sr">🇷🇸 SR</a></li>
+        <li><a href="#" class="nav-link lang-switch" data-lang="en">🇬🇧 EN</a></li>
       </ul>
     </div>
   </nav>
 
   <div class="container">
-    <h1>ShiftMD v2.0</h1>
-    <p style="text-align: center; color: #6b7280; margin-top: -10px; margin-bottom: 20px; font-size: 14px;">
+    <h1 data-key="heading">ShiftMD v3.0</h1>
+    <p style="text-align: center; color: #6b7280; margin-top: -10px; margin-bottom: 20px; font-size: 14px;" data-key="subtitle">
       Sistem za raspored dežurstava lekara
     </p>
 
     <form id="form" class="card">
-      <input
-        type="text"
-        id="hospital"
-        name="hospital"
-        placeholder="Naziv ustanove"
-        required
-      >
+      <input type="text" id="hospital" name="hospital" data-key-placeholder="form_hospital" required>
 
       <div class="row">
         <select id="month" name="month" required>
-          <option value="">Mesec</option>
-          <option value="1">Januar</option>
-          <option value="2">Februar</option>
-          <option value="3">Mart</option>
-          <option value="4">April</option>
-          <option value="5">Maj</option>
-          <option value="6">Jun</option>
-          <option value="7">Jul</option>
-          <option value="8">Avgust</option>
-          <option value="9">Septembar</option>
-          <option value="10">Oktobar</option>
-          <option value="11">Novembar</option>
-          <option value="12">Decembar</option>
+          <option value="" data-key="form_month_placeholder">Mesec</option>
         </select>
-
         <select id="year" name="year" required>
-          <option value="">Godina</option>
-          <!-- Godine se dinamički dodaju putem JavaScript-a -->
-      </select>
+          <option value="" data-key="form_year_placeholder">Godina</option>
+        </select>
       </div>
 
       <div class="form-group">
-        <label for="dutyStaffCount">Broj dežurnih po danu:</label>
-        <input
-          type="number"
-          id="dutyStaffCount"
-          name="dutyStaffCount"
-          value="1"
-          min="1"
-          max="10"
-          required
-        >
-        <small>Koliko ukupno dežurstava (1/1) treba popuniti po danu</small>
+        <label for="dutyStaffCount" data-key="form_duty_count_label">Broj dežurnih po danu:</label>
+        <input type="number" id="dutyStaffCount" name="dutyStaffCount" value="1" min="1" max="10" required>
+        <small data-key="form_duty_count_hint">Koliko ukupno dežurstava (1/1) treba popuniti po danu</small>
       </div>
 
       <div class="form-group checkbox-group">
         <label class="checkbox-label">
-          <input
-            type="checkbox"
-            id="allowLessSpecialists"
-            name="allowLessSpecialists"
-          >
-          <span>Dozvoli da bude manje od 50% specijalista među dežurnima?</span>
+          <input type="checkbox" id="allowLessSpecialists" name="allowLessSpecialists">
+          <span data-key="form_allow_less_label">Dozvoli da bude manje od 50% specijalista među dežurnima?</span>
         </label>
-        <small>
-          Ako je čekirano: specijalista će obavezno biti glavni dežurni za taj dan, 
-          ali ukupan udeo specijalista može biti manji od 50%.<br>
+        <small id="allowLessHint" data-key="form_allow_less_hint_unchecked">
           Ako NIJE čekirano: najmanje 50% dežurnih moraju biti specijalisti.
         </small>
       </div>
 
-      <div class="calendar-header">
-        <div>Pon</div>
-        <div>Uto</div>
-        <div>Sre</div>
-        <div>Čet</div>
-        <div>Pet</div>
-        <div>Sub</div>
-        <div>Ned</div>
+      <div class="calendar-header" id="calendarHeader">
+        <div data-key="day_mon">Pon</div>
+        <div data-key="day_tue">Uto</div>
+        <div data-key="day_wed">Sre</div>
+        <div data-key="day_thu">Čet</div>
+        <div data-key="day_fri">Pet</div>
+        <div data-key="day_sat">Sub</div>
+        <div data-key="day_sun">Ned</div>
       </div>
 
       <div id="calendar" class="calendar">
-        <p style="grid-column: 1 / -1; text-align: center; color: #6b7280;">
+        <p style="grid-column: 1 / -1; text-align: center; color: #6b7280;" data-key="calendar_placeholder">
           Izaberite mesec i godinu da biste videli kalendar
         </p>
       </div>
@@ -107,30 +76,30 @@
       <div class="spacer"></div>
 
       <div class="form-group">
-        <label for="excel">📂 Otpremite Excel fajl sa spiskom lekara:</label>
+        <label for="excel" data-key="form_excel_label">📂 Otpremite Excel fajl sa spiskom lekara:</label>
         <input type="file" id="excel" name="excel" accept=".xlsx,.xls" required>
-        <small>Dozvoljeni formati: .xlsx, .xls | <a href="/demo-lekari.xlsx" style="color: #2563eb;">📥 Preuzmi primer Excel fajla</a></small>
+        <small>
+          <span data-key="form_excel_hint">Dozvoljeni formati: .xlsx, .xls</span> | 
+          <a href="/demo-lekari.xlsx" style="color: #2563eb;" data-key="form_demo_link">📥 Preuzmi primer Excel fajla</a>
+        </small>
       </div>
 
       <div class="spacer-small"></div>
 
-      <button type="submit" id="submitBtn">
-        ⚡ Generiši raspored
-      </button>
+      <button type="submit" id="submitBtn" data-key="form_submit">⚡ Generiši raspored</button>
     </form>
 
     <div id="status" class="status hidden"></div>
     <div id="result" class="card result"></div>
 
-    <button id="downloadBtn" class="download-btn hidden">
-      📥 Preuzmi Excel raspored
-    </button>
+    <button id="downloadBtn" class="download-btn hidden" data-key="download_btn">📥 Preuzmi Excel raspored</button>
 
-    <p style="text-align: center; color: #9ca3af; font-size: 11px; margin-top: 20px;">
-      ShiftMD v2.0 &copy; 2026 - Sistem za raspored dežurstava
+    <p style="text-align: center; color: #9ca3af; font-size: 11px; margin-top: 20px;" data-key="footer_text">
+      ShiftMD v3.0 © 2026 - Sistem za raspored dežurstava
     </p>
   </div>
 
+  <script src="/lang.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>
