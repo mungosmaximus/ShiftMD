@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ShiftMD v3.0 - Uputstvo</title>
+  <title>ShiftMD v3.6 - Uputstvo</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
   <nav class="navbar">
     <div class="nav-container">
-      <a href="/" class="nav-brand" data-key="nav_brand">🩺 ShiftMD v3.0</a>
+      <a href="/" class="nav-brand">🩺 ShiftMD v3.6</a>
       <ul class="nav-links">
-        <li><a href="/" class="nav-link">🏠 Početna</a></li>
-        <li><a href="/o-sistemu" class="nav-link">ℹ️ O sistemu</a></li>
-        <li><a href="/uputstvo" class="nav-link active">📖 Uputstvo</a></li>
+        <li><a href="/" class="nav-link" data-nav="home">🏠 Početna</a></li>
+        <li><a href="/o-sistemu" class="nav-link" data-nav="about">ℹ️ O sistemu</a></li>
+        <li><a href="/uputstvo" class="nav-link active" data-nav="guide">📖 Uputstvo</a></li>
         <li class="lang-divider"></li>
         <li><a href="#" class="nav-link lang-switch active-lang" data-lang="sr">🇷🇸 SR</a></li>
         <li><a href="#" class="nav-link lang-switch" data-lang="en">🇬🇧 EN</a></li>
@@ -25,115 +25,87 @@
   <div class="info-page">
     <div class="card">
       <h1 data-key="guide_title">📖 Uputstvo za korišćenje</h1>
-      <p style="color: #6b7280; font-size: 16px; margin-bottom: 20px;" data-key="guide_subtitle">
-        Korak po korak vodič za generisanje rasporeda dežurstava
-      </p>
+      <p style="color:#6b7280;font-size:16px;margin-bottom:20px" data-key="guide_subtitle">Korak po korak vodič za generisanje rasporeda dežurstava</p>
 
       <h2 data-key="guide_step1_title">1️⃣ Priprema Excel fajla sa lekarima</h2>
-      <p data-key="guide_step1_text">Ovo je najvažniji korak. Excel fajl mora imati tačno određene kolone sa ispravnim nazivima:</p>
+      <p data-key="guide_step1_text">Ovo je najvažniji korak. Excel fajl mora imati tačno određene kolone:</p>
 
       <table class="info-table">
-        <thead>
-          <tr>
-            <th data-key="guide_table_header_col">Kolona</th>
-            <th data-key="guide_table_header_required">Obavezno</th>
-            <th data-key="guide_table_header_desc">Opis</th>
-            <th data-key="guide_table_header_values">Dozvoljene vrednosti</th>
-          </tr>
-        </thead>
+        <thead><tr><th data-key="guide_table_header_col">Kolona</th><th data-key="guide_table_header_required">Obavezno</th><th data-key="guide_table_header_desc">Opis</th><th data-key="guide_table_header_values">Dozvoljene vrednosti</th></tr></thead>
         <tbody>
-          <tr><td><strong data-key="guide_col_name">Ime i prezime</strong></td><td>✅</td><td data-key="guide_col_name_desc">Puno ime i prezime lekara</td><td data-key="guide_col_name_values">Bilo koji tekst</td></tr>
-          <tr><td><strong data-key="guide_col_seniority">Starešinstvo</strong></td><td>✅</td><td data-key="guide_col_seniority_desc">Broj godina staža</td><td data-key="guide_col_seniority_values">Broj (npr. 5, 10, 15)</td></tr>
-          <tr><td><strong data-key="guide_col_chief">Može biti glavni</strong></td><td>✅</td><td data-key="guide_col_chief_desc">Da li lekar može biti glavni dežurni?</td><td data-key="guide_col_chief_values">DA ili NE</td></tr>
-          <tr><td><strong data-key="guide_col_role">Tip zaposlenog</strong></td><td>✅</td><td data-key="guide_col_role_desc">Vrsta lekara</td><td data-key="guide_col_role_values">specijalista ili specijalizant</td></tr>
-          <tr><td><strong data-key="guide_col_share">Udeo dežurstva</strong></td><td>✅</td><td data-key="guide_col_share_desc">Koliki deo punog dežurstva</td><td data-key="guide_col_share_values">celo, polovina, trećina, četvrtina, osmina</td></tr>
-          <tr><td><strong data-key="guide_col_unavailable">Ne može</strong></td><td>❌</td><td data-key="guide_col_unavailable_desc">Datumi kada lekar NE MOŽE da dežura</td><td data-key="guide_col_unavailable_values">Npr. 05-06-2026, 15-06-2026</td></tr>
-          <tr><td><strong data-key="guide_col_preferred">Želi da dežura</strong></td><td>❌</td><td data-key="guide_col_preferred_desc">Datumi kada lekar ŽELI da dežura</td><td data-key="guide_col_preferred_values">Npr. 01-06-2026, 20-06-2026</td></tr>
+          <tr><td><strong>Ime i prezime / Full Name</strong></td><td>✅</td><td data-key="guide_col_name_desc">Puno ime</td><td data-key="guide_col_name_values">Bilo koji tekst</td></tr>
+          <tr><td><strong>Starešinstvo / Seniority</strong></td><td>✅</td><td data-key="guide_col_seniority_desc">Arbitrarna vrednost 1-15. Manji broj = veći prioritet</td><td data-key="guide_col_seniority_values">Broj od 1 do 15</td></tr>
+          <tr><td><strong>Može biti glavni / Can be Chief</strong></td><td>✅</td><td data-key="guide_col_chief_desc">Glavni dežurni?</td><td data-key="guide_col_chief_values">DA/YES ili NE/NO</td></tr>
+          <tr><td><strong>Tip zaposlenog / Employee Type</strong></td><td>✅</td><td data-key="guide_col_role_desc">Vrsta lekara</td><td data-key="guide_col_role_values">specijalista/specialist ili specijalizant/resident</td></tr>
+          <tr><td><strong>Udeo dežurstva / Duty Share</strong></td><td>✅</td><td data-key="guide_col_share_desc">Koliki deo</td><td data-key="guide_col_share_values">celo/full, polovina/half, trećina/third, četvrtina/quarter, osmina/eighth</td></tr>
+          <tr><td><strong>Ne može / Unavailable</strong></td><td>❌</td><td data-key="guide_col_unavailable_desc">Ne može da dežura</td><td data-key="guide_col_unavailable_values">Npr. 05-06-2026</td></tr>
+          <tr><td><strong>Želi da dežura / Preferred</strong></td><td>❌</td><td data-key="guide_col_preferred_desc">Želi da dežura</td><td data-key="guide_col_preferred_values">Npr. 01-06-2026</td></tr>
+          <tr><td><strong>Rang / Rank</strong></td><td>⚠️</td><td data-key="guide_col_rank_desc">Redni broj u timu</td><td data-key="guide_col_rank_values">1, 2, 3...</td></tr>
         </tbody>
       </table>
 
       <div class="highlight-box-green">
         <h3 data-key="guide_warning_title">⚠️ Važne napomene:</h3>
         <ul>
-          <li data-key="guide_warning_1">Sve kolone su obavezne osim "Ne može" i "Želi da dežura"</li>
-          <li data-key="guide_warning_2">Datumi moraju biti u formatu DD-MM-GGGG</li>
-          <li data-key="guide_warning_3">Za udeo koristite isključivo tekstualne oznake</li>
-          <li data-key="guide_warning_4">Ne koristite razlomke (1/1, 1/2)!</li>
-          <li data-key="guide_warning_5">Samo specijalisti mogu imati "DA" u koloni "Može biti glavni"</li>
+          <li data-key="guide_warning_1">Sve kolone obavezne osim "Ne može", "Želi" i "Rang"</li>
+          <li data-key="guide_warning_2">Datumi u formatu DD-MM-GGGG</li>
+          <li data-key="guide_warning_3">Za udeo koristite tekstualne oznake</li>
+          <li data-key="guide_warning_4">Ne koristite razlomke!</li>
+          <li data-key="guide_warning_5">Samo specijalisti mogu biti glavni</li>
+          <li data-key="guide_warning_6">'Rang' samo za rangirane timove</li>
+          <li data-key="guide_warning_7">Starešinstvo je arbitrarna vrednost 1-15, ne godine staža</li>
         </ul>
       </div>
 
       <h2 data-key="guide_example_title">📋 Primer Excel fajla</h2>
-      <p data-key="guide_example_text">Preuzmite gotov primer sa 16 lekara koji možete koristiti za testiranje:</p>
-      <p><a href="/demo-lekari.xlsx" class="btn-download" data-key="guide_example_btn">📥 Preuzmi demo Excel fajl (16 lekara)</a></p>
-      <p style="color: #6b7280; font-size: 13px;" data-key="guide_example_note">Primer sadrži 8 specijalista i 8 specijalizanata.</p>
+      <p data-key="guide_example_text">Preuzmite primer sa 16 lekara:</p>
+      <p><a href="/demo-lekari.xlsx" class="btn-download" data-key="guide_example_btn_sr">📥 Demo Excel (srpska zaglavlja)</a></p>
+      <p><a href="/demo-physicians.xlsx" class="btn-download" data-key="guide_example_btn_en">📥 Demo Excel (engleska zaglavlja)</a></p>
 
-      <h2 data-key="guide_step2_title">2️⃣ Popunjavanje forme na početnoj strani</h2>
+      <h2 data-key="guide_step2_title">2️⃣ Popunjavanje forme</h2>
       <ol class="step-list">
-        <li><strong data-key="guide_step2_1_title">Naziv ustanove</strong><br><span data-key="guide_step2_1_text">Unesite naziv bolnice ili doma zdravlja.</span></li>
-        <li><strong data-key="guide_step2_2_title">Mesec i Godina</strong><br><span data-key="guide_step2_2_text">Izaberite mesec i godinu. Kalendar će se automatski prikazati.</span></li>
-        <li><strong data-key="guide_step2_3_title">Broj dežurnih po danu</strong><br><span data-key="guide_step2_3_text">Koliko celih dežurstava (1/1) treba popuniti svakog dana.</span></li>
-        <li><strong data-key="guide_step2_4_title">Čekboks za specijaliste</strong><br><span data-key="guide_step2_4_text">Opcija za strožije pravilo o specijalistima.</span></li>
-        <li><strong data-key="guide_step2_5_title">Kalendar</strong><br><span data-key="guide_step2_5_text">Kliknite na datume kada treba organizovati dežurstva.</span></li>
-        <li><strong data-key="guide_step2_6_title">Excel fajl</strong><br><span data-key="guide_step2_6_text">Otpremite pripremljeni Excel fajl sa spiskom lekara.</span></li>
+        <li><strong data-key="guide_step2_1_title">Naziv ustanove</strong><br><span data-key="guide_step2_1_text">Unesite naziv bolnice.</span></li>
+        <li><strong data-key="guide_step2_2_title">Mesec i Godina</strong><br><span data-key="guide_step2_2_text">Izaberite period.</span></li>
+        <li><strong data-key="guide_step2_3_title">Broj dežurnih</strong><br><span data-key="guide_step2_3_text">Koliko lekara po danu.</span></li>
+        <li><strong data-key="guide_step2_4_title">Specijalisti</strong><br><span data-key="guide_step2_4_text">Pravilo za specijaliste.</span></li>
+        <li><strong data-key="guide_step2_5_title">Rangirani timovi</strong><br><span data-key="guide_step2_5_text">Opciono za hirurške timove.</span></li>
+        <li><strong data-key="guide_step2_6_title">Kalendar Tip 1</strong><br><span data-key="guide_step2_6_text">Izaberite dane za Tip 1.</span></li>
+        <li><strong data-key="guide_step2_8_title">Tip 2 (opciono)</strong><br><span data-key="guide_step2_8_text">Ako treba drugi tip dežurstva.</span></li>
+        <li><strong data-key="guide_step2_9_title">Prilagođena imena</strong><br><span data-key="guide_step2_9_text">Nazivi za tipove.</span></li>
+        <li><strong data-key="guide_step2_7_title">Excel fajl</strong><br><span data-key="guide_step2_7_text">Otpremite fajl.</span></li>
       </ol>
 
-      <h2 data-key="guide_step3_title">3️⃣ Generisanje i preuzimanje</h2>
-      <ol class="step-list">
-        <li><strong data-key="guide_step3_1_title">Kliknite "Generiši raspored"</strong><br><span data-key="guide_step3_1_text">Sistem će obraditi podatke i prikazati rezultat.</span></li>
-        <li><strong data-key="guide_step3_2_title">Pregledajte rezultat</strong><br><span data-key="guide_step3_2_text">Tekstualni prikaz rasporeda se pojavljuje ispod forme.</span></li>
-        <li><strong data-key="guide_step3_3_title">Preuzmite Excel</strong><br><span data-key="guide_step3_3_text">Kliknite na dugme za preuzimanje.</span></li>
-      </ol>
-
-      <h2 data-key="guide_output_title">📊 Šta sadrži output Excel?</h2>
-      <table class="info-table">
-        <thead><tr><th>Sheet</th><th>Sadržaj</th></tr></thead>
-        <tbody>
-          <tr><td><strong data-key="guide_output_sheet1">Raspored</strong></td><td data-key="guide_output_sheet1_desc">Formatiran prikaz sa statistikom, zaglavljem, svim dežurstvima.</td></tr>
-          <tr><td><strong data-key="guide_output_sheet2">Tabelarni pregled</strong></td><td data-key="guide_output_sheet2_desc">Tabela sa kolonama: Datum, Dan, Dežurstvo, Ime, Tip, Udeo, Glavni.</td></tr>
-          <tr><td><strong data-key="guide_output_sheet3">Statistika</strong></td><td data-key="guide_output_sheet3_desc">Pregled po lekaru: opterećenje, broj dežurstava, vikenda.</td></tr>
-        </tbody>
-      </table>
-
-      <div style="text-align: center; margin-top: 40px; padding: 30px; background: #f0f4ff; border-radius: 12px;">
-        <h2 style="border: none; margin-top: 0;" data-key="guide_cta_title">🚀 Spremni da počnete?</h2>
-        <p style="margin-bottom: 20px;" data-key="guide_cta_text">Preuzmite demo Excel, otpremite ga na početnoj strani i testirajte sistem.</p>
+      <div style="text-align:center;margin-top:40px;padding:30px;background:#f0f4ff;border-radius:12px">
+        <h2 style="border:none;margin-top:0" data-key="guide_cta_title">🚀 Spremni da počnete?</h2>
+        <p style="margin-bottom:20px" data-key="guide_cta_text">Preuzmite demo Excel i testirajte sistem.</p>
         <a href="/" class="btn-download" data-key="guide_cta_btn">⚡ Idi na početnu stranu</a>
       </div>
     </div>
   </div>
 
+  <footer class="site-footer">
+    <div class="footer-cikt" data-key="footer_cikt"></div>
+    <div class="footer-university" data-key="footer_university"></div>
+    <div class="footer-version">ShiftMD v3.6</div>
+  </footer>
+
   <script src="/lang.js"></script>
   <script>
     let currentLang = localStorage.getItem("shiftmd_lang") || "sr";
-    
+    const navTranslations = {
+      sr: { home: "🏠 Početna", about: "ℹ️ O sistemu", guide: "📖 Uputstvo", brand: "🩺 ShiftMD v3.6" },
+      en: { home: "🏠 Home", about: "ℹ️ About", guide: "📖 Guide", brand: "🩺 ShiftMD v3.6" }
+    };
     function applyLanguage(lang) {
-      currentLang = lang;
-      localStorage.setItem("shiftmd_lang", lang);
-      
-      document.querySelectorAll("[data-key]").forEach(el => {
-        const key = el.getAttribute("data-key");
-        const text = t(lang, key);
-        if (text && el.tagName !== "INPUT" && el.tagName !== "SELECT") {
-          el.textContent = text;
-        }
-      });
-      
-      document.querySelectorAll(".lang-switch").forEach(link => {
-        link.classList.toggle("active-lang", link.getAttribute("data-lang") === lang);
-      });
-      
+      currentLang = lang; localStorage.setItem("shiftmd_lang", lang);
+      document.querySelectorAll("[data-nav]").forEach(el => { const k = el.getAttribute("data-nav"); if (navTranslations[lang]?.[k]) el.textContent = navTranslations[lang][k]; });
+      document.querySelector(".nav-brand").textContent = navTranslations[lang].brand;
+      document.querySelectorAll("[data-key]").forEach(el => { const k = el.getAttribute("data-key"); const txt = t(lang, k); if (txt && el.tagName !== "INPUT" && el.tagName !== "SELECT") el.textContent = txt; });
+      document.querySelectorAll(".lang-switch").forEach(l => l.classList.toggle("active-lang", l.getAttribute("data-lang") === lang));
       document.documentElement.lang = lang;
-      document.title = t(lang, "guide_title") + " - ShiftMD v3.0";
+      document.title = t(lang, "guide_title") + " - ShiftMD v3.6";
     }
-    
-    document.querySelectorAll(".lang-switch").forEach(link => {
-      link.addEventListener("click", function(e) {
-        e.preventDefault();
-        applyLanguage(this.getAttribute("data-lang"));
-      });
-    });
-    
+    document.querySelectorAll(".lang-switch").forEach(l => l.addEventListener("click", function(e) { e.preventDefault(); applyLanguage(this.getAttribute("data-lang")); }));
     applyLanguage(currentLang);
   </script>
 </body>

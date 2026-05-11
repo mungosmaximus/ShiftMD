@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ShiftMD v3.0 - O sistemu</title>
+  <title>ShiftMD v3.6 - O sistemu</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
   <nav class="navbar">
     <div class="nav-container">
-      <a href="/" class="nav-brand" data-key="nav_brand">🩺 ShiftMD v3.0</a>
+      <a href="/" class="nav-brand">🩺 ShiftMD v3.6</a>
       <ul class="nav-links">
-        <li><a href="/" class="nav-link">🏠 Početna</a></li>
-        <li><a href="/o-sistemu" class="nav-link active">ℹ️ O sistemu</a></li>
-        <li><a href="/uputstvo" class="nav-link">📖 Uputstvo</a></li>
+        <li><a href="/" class="nav-link" data-nav="home">🏠 Početna</a></li>
+        <li><a href="/o-sistemu" class="nav-link active" data-nav="about">ℹ️ O sistemu</a></li>
+        <li><a href="/uputstvo" class="nav-link" data-nav="guide">📖 Uputstvo</a></li>
         <li class="lang-divider"></li>
         <li><a href="#" class="nav-link lang-switch active-lang" data-lang="sr">🇷🇸 SR</a></li>
         <li><a href="#" class="nav-link lang-switch" data-lang="en">🇬🇧 EN</a></li>
@@ -25,26 +25,22 @@
   <div class="info-page">
     <div class="card">
       <h1 data-key="about_title">ℹ️ O sistemu ShiftMD</h1>
-      <p style="color: #6b7280; font-size: 16px; margin-bottom: 20px;" data-key="about_subtitle">
-        Inteligentni sistem za pravednu raspodelu dežurstava sa fokusom na sprečavanje burnout-a
-      </p>
+      <p style="color:#6b7280;font-size:16px;margin-bottom:20px" data-key="about_subtitle">Inteligentni sistem za pravednu raspodelu dežurstava sa fokusom na sprečavanje burnout-a</p>
 
       <div class="highlight-box">
         <h3 data-key="about_mission_title">🎯 Naša misija</h3>
-        <p data-key="about_mission_text">
-          ShiftMD je stvoren sa jednim ciljem: eliminisati nepravdu u raspodeli dežurstava 
-          i zaštititi zdravstvene radnike od prekomernog opterećenja.
-        </p>
+        <p data-key="about_mission_text">ShiftMD je stvoren sa jednim ciljem: eliminisati nepravdu u raspodeli dežurstava i zaštititi zdravstvene radnike od prekomernog opterećenja.</p>
       </div>
 
       <h2 data-key="about_features_title">✨ Ključne mogućnosti</h2>
       <div class="feature-grid">
         <div class="feature-card"><div class="icon">⚖️</div><h4 data-key="about_feature_1_title">Pravedna raspodela</h4><p data-key="about_feature_1_text">Napredni algoritam osigurava da svi lekari dobiju približno isto opterećenje</p></div>
         <div class="feature-card"><div class="icon">🛡️</div><h4 data-key="about_feature_2_title">Burnout zaštita</h4><p data-key="about_feature_2_text">Minimum 2 dana razmaka, limitirani vikendi, maksimalno opterećenje po lekaru</p></div>
-        <div class="feature-card"><div class="icon">⭐</div><h4 data-key="about_feature_3_title">Poštovanje želja</h4><p data-key="about_feature_3_text">Lekari mogu naznačiti datume kada žele da dežuraju - sistem im daje prioritet</p></div>
-        <div class="feature-card"><div class="icon">🚫</div><h4 data-key="about_feature_4_title">"Ne može" se poštuje</h4><p data-key="about_feature_4_text">Datumi kada lekar ne može da dežura se apsolutno poštuju, bez izuzetaka</p></div>
-        <div class="feature-card"><div class="icon">👑</div><h4 data-key="about_feature_5_title">Glavni dežurni</h4><p data-key="about_feature_5_text">Automatski dodeljuje specijalistu koji može biti glavni za svako dežurstvo</p></div>
-        <div class="feature-card"><div class="icon">📊</div><h4 data-key="about_feature_6_title">Detaljna statistika</h4><p data-key="about_feature_6_text">Max, prosek i min opterećenje, broj dežurstava i vikenda za svakog lekara</p></div>
+        <div class="feature-card"><div class="icon">⭐</div><h4 data-key="about_feature_3_title">Poštovanje želja</h4><p data-key="about_feature_3_text">Lekari mogu naznačiti datume kada žele da dežuraju</p></div>
+        <div class="feature-card"><div class="icon">🚫</div><h4 data-key="about_feature_4_title">"Ne može" se poštuje</h4><p data-key="about_feature_4_text">Datumi kada lekar ne može da dežura se apsolutno poštuju</p></div>
+        <div class="feature-card"><div class="icon">👑</div><h4 data-key="about_feature_5_title">Glavni dežurni</h4><p data-key="about_feature_5_text">Automatski dodeljuje specijalistu koji može biti glavni</p></div>
+        <div class="feature-card"><div class="icon">📊</div><h4 data-key="about_feature_6_title">Rangirani timovi</h4><p data-key="about_feature_6_text">Podrška za hirurške timove sa rangiranim dežurnima</p></div>
+        <div class="feature-card"><div class="icon">🔄</div><h4 data-key="about_feature_7_title">Dva tipa dežurstava</h4><p data-key="about_feature_7_text">Podrška za različite tipove dežurstava u istom mesecu</p></div>
       </div>
 
       <h2 data-key="about_logic_title">🧠 Logika rasterećenja i sprečavanja burnout-a</h2>
@@ -52,20 +48,7 @@
         <h3 data-key="about_logic_box_title">🛡️ Burnout prevencija - srce sistema</h3>
         <p data-key="about_logic_box_text">ShiftMD koristi sofisticirani scoring algoritam koji uzima u obzir 9 različitih faktora.</p>
       </div>
-      <h3 data-key="about_scoring_title">📐 Kako funkcioniše scoring?</h3>
-      <p data-key="about_scoring_text">Svaki lekar dobija numerički "skor". Manji skor = veća šansa da dobije dežurstvo.</p>
-      <h3 data-key="about_factors_title">🔢 Faktori scoringa (9 nivoa zaštite):</h3>
-      <ol>
-        <li data-key="about_factor_1">Ukupno opterećenje (×50) - Najvažniji faktor.</li>
-        <li data-key="about_factor_2">Broj dežurstava sa kvadratnom kaznom.</li>
-        <li data-key="about_factor_3">Vikend zaštita (×25) - Vikend dežurstva su posebno "kažnjena".</li>
-        <li data-key="about_factor_4">Gustina dežurstava - Idealni razmak je 4+ dana.</li>
-        <li data-key="about_factor_5">Razmak od poslednjeg (×5 bonus/dan) - Minimum 2 dana.</li>
-        <li data-key="about_factor_6">Starešinstvo (kategorijski ×20) - Mlađi lekari imaju prednost.</li>
-        <li data-key="about_factor_7">Poređenje sa prosekom - Iznad proseka = dodatna kazna.</li>
-        <li data-key="about_factor_8">Udeo dežurstva - Bonus za tačno poklapanje.</li>
-        <li data-key="about_factor_9">Želje (bonus -30) - Značajan bonus za željene datume.</li>
-      </ol>
+
       <h3 data-key="about_limits_title">📊 Maksimalni limiti:</h3>
       <ul>
         <li data-key="about_limit_1">Max dana dežurstva: proporcionalno broju lekara + 2</li>
@@ -73,53 +56,38 @@
         <li data-key="about_limit_3">Max vikenda: proporcionalno broju vikend dana + 1</li>
         <li data-key="about_limit_4">Min razmak: 2 dana između dežurstava (apsolutno pravilo)</li>
       </ul>
-      <h2 data-key="about_process_title">🔄 Proces dodele (korak po korak)</h2>
-      <ol class="step-list">
-        <li><strong data-key="about_step_1_title">Glavni dežurni</strong><br><span data-key="about_step_1_text">Prvo se dodeljuje specijalista koji može biti glavni.</span></li>
-        <li><strong data-key="about_step_2_title">Želje</strong><br><span data-key="about_step_2_text">Zatim se dodeljuju lekari koji su izrazili želju za taj datum.</span></li>
-        <li><strong data-key="about_step_3_title">Popuna</strong><br><span data-key="about_step_3_text">Ostatak se popunjava po scoringu.</span></li>
-        <li><strong data-key="about_step_4_title">Validacija</strong><br><span data-key="about_step_4_text">Provera da li svako dežurstvo ima glavnog.</span></li>
-      </ol>
-      <div style="text-align: center; margin-top: 40px; padding: 30px; background: #f0f4ff; border-radius: 12px;">
-        <h2 style="border: none; margin-top: 0;" data-key="about_cta_title">🚀 Spremni za pravednije dežurstvo?</h2>
-        <p style="margin-bottom: 20px;" data-key="about_cta_text">Vratite se na početnu stranu i generišite svoj prvi raspored.</p>
+
+      <div style="text-align:center;margin-top:40px;padding:30px;background:#f0f4ff;border-radius:12px">
+        <h2 style="border:none;margin-top:0" data-key="about_cta_title">🚀 Spremni za pravednije dežurstvo?</h2>
+        <p style="margin-bottom:20px" data-key="about_cta_text">Vratite se na početnu stranu i generišite svoj prvi raspored.</p>
         <a href="/" class="btn-download" data-key="about_cta_btn">⚡ Generiši raspored</a>
       </div>
     </div>
   </div>
 
+  <footer class="site-footer">
+    <div class="footer-cikt" data-key="footer_cikt"></div>
+    <div class="footer-university" data-key="footer_university"></div>
+    <div class="footer-version">ShiftMD v3.6</div>
+  </footer>
+
   <script src="/lang.js"></script>
   <script>
-    // Jezički sistem za statičke stranice
     let currentLang = localStorage.getItem("shiftmd_lang") || "sr";
-    
+    const navTranslations = {
+      sr: { home: "🏠 Početna", about: "ℹ️ O sistemu", guide: "📖 Uputstvo", brand: "🩺 ShiftMD v3.6" },
+      en: { home: "🏠 Home", about: "ℹ️ About", guide: "📖 Guide", brand: "🩺 ShiftMD v3.6" }
+    };
     function applyLanguage(lang) {
-      currentLang = lang;
-      localStorage.setItem("shiftmd_lang", lang);
-      
-      document.querySelectorAll("[data-key]").forEach(el => {
-        const key = el.getAttribute("data-key");
-        const text = t(lang, key);
-        if (text && el.tagName !== "INPUT" && el.tagName !== "SELECT") {
-          el.textContent = text;
-        }
-      });
-      
-      document.querySelectorAll(".lang-switch").forEach(link => {
-        link.classList.toggle("active-lang", link.getAttribute("data-lang") === lang);
-      });
-      
+      currentLang = lang; localStorage.setItem("shiftmd_lang", lang);
+      document.querySelectorAll("[data-nav]").forEach(el => { const k = el.getAttribute("data-nav"); if (navTranslations[lang]?.[k]) el.textContent = navTranslations[lang][k]; });
+      document.querySelector(".nav-brand").textContent = navTranslations[lang].brand;
+      document.querySelectorAll("[data-key]").forEach(el => { const k = el.getAttribute("data-key"); const txt = t(lang, k); if (txt && el.tagName !== "INPUT" && el.tagName !== "SELECT") el.textContent = txt; });
+      document.querySelectorAll(".lang-switch").forEach(l => l.classList.toggle("active-lang", l.getAttribute("data-lang") === lang));
       document.documentElement.lang = lang;
-      document.title = t(lang, "about_title") + " - ShiftMD v3.0";
+      document.title = t(lang, "about_title") + " - ShiftMD v3.6";
     }
-    
-    document.querySelectorAll(".lang-switch").forEach(link => {
-      link.addEventListener("click", function(e) {
-        e.preventDefault();
-        applyLanguage(this.getAttribute("data-lang"));
-      });
-    });
-    
+    document.querySelectorAll(".lang-switch").forEach(l => l.addEventListener("click", function(e) { e.preventDefault(); applyLanguage(this.getAttribute("data-lang")); }));
     applyLanguage(currentLang);
   </script>
 </body>

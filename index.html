@@ -3,15 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ShiftMD v3.0 - Raspored dežurstava</title>
+  <title>ShiftMD v3.6 - Raspored dežurstava</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-
-  <!-- NAVIGACIJA -->
   <nav class="navbar">
     <div class="nav-container">
-      <a href="/" class="nav-brand" data-key="nav_brand">🩺 ShiftMD v3.0</a>
+      <a href="/" class="nav-brand" data-key="nav_brand">🩺 ShiftMD v3.6</a>
       <ul class="nav-links">
         <li><a href="/" class="nav-link active" data-key="nav_home">🏠 Početna</a></li>
         <li><a href="/o-sistemu" class="nav-link" data-key="nav_about">ℹ️ O sistemu</a></li>
@@ -24,17 +22,30 @@
   </nav>
 
   <div class="container">
-    <h1 data-key="heading">ShiftMD v3.0</h1>
-    <p style="text-align: center; color: #6b7280; margin-top: -10px; margin-bottom: 20px; font-size: 14px;" data-key="subtitle">
-      Sistem za raspored dežurstava lekara
-    </p>
+    <h1 data-key="heading">ShiftMD v3.6</h1>
+    <p style="text-align:center;color:#6b7280;margin-top:-10px;margin-bottom:20px;font-size:14px" data-key="subtitle">Sistem za raspored dežurstava lekara</p>
 
     <form id="form" class="card">
       <input type="text" id="hospital" name="hospital" data-key-placeholder="form_hospital" required>
 
+      <!-- ===== TIP 1 ===== -->
+      <h3 class="section-title" data-key="form_duty_type1_label">Dežurstvo - Tip 1</h3>
+
       <div class="row">
         <select id="month" name="month" required>
           <option value="" data-key="form_month_placeholder">Mesec</option>
+          <option value="1">Januar</option>
+          <option value="2">Februar</option>
+          <option value="3">Mart</option>
+          <option value="4">April</option>
+          <option value="5">Maj</option>
+          <option value="6">Jun</option>
+          <option value="7">Jul</option>
+          <option value="8">Avgust</option>
+          <option value="9">Septembar</option>
+          <option value="10">Oktobar</option>
+          <option value="11">Novembar</option>
+          <option value="12">Decembar</option>
         </select>
         <select id="year" name="year" required>
           <option value="" data-key="form_year_placeholder">Godina</option>
@@ -42,62 +53,103 @@
       </div>
 
       <div class="form-group">
-        <label for="dutyStaffCount" data-key="form_duty_count_label">Broj dežurnih po danu:</label>
-        <input type="number" id="dutyStaffCount" name="dutyStaffCount" value="1" min="1" max="10" required>
-        <small data-key="form_duty_count_hint">Koliko ukupno dežurstava (1/1) treba popuniti po danu</small>
+        <label for="dutyStaffCount1" data-key="form_duty_count_label">Broj dežurnih po danu:</label>
+        <input type="number" id="dutyStaffCount1" value="1" min="1" max="20" required>
+        <small data-key="form_duty_count_hint">Koliko ukupno dežurstava treba popuniti po danu</small>
       </div>
 
       <div class="form-group checkbox-group">
-        <label class="checkbox-label">
-          <input type="checkbox" id="allowLessSpecialists" name="allowLessSpecialists">
-          <span data-key="form_allow_less_label">Dozvoli da bude manje od 50% specijalista među dežurnima?</span>
-        </label>
-        <small id="allowLessHint" data-key="form_allow_less_hint_unchecked">
-          Ako NIJE čekirano: najmanje 50% dežurnih moraju biti specijalisti.
-        </small>
+        <label class="checkbox-label"><input type="checkbox" id="allowLessSpecialists1"><span data-key="form_allow_less_label">Dozvoli manje od 50% specijalista?</span></label>
+        <small id="allowLessHint1" class="allowLessHint" data-key="form_allow_less_hint_unchecked">Ako NIJE čekirano: najmanje 50% dežurnih moraju biti specijalisti.</small>
       </div>
 
-      <div class="calendar-header" id="calendarHeader">
-        <div data-key="day_mon">Pon</div>
-        <div data-key="day_tue">Uto</div>
-        <div data-key="day_wed">Sre</div>
-        <div data-key="day_thu">Čet</div>
-        <div data-key="day_fri">Pet</div>
-        <div data-key="day_sat">Sub</div>
-        <div data-key="day_sun">Ned</div>
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label"><input type="checkbox" id="useRankedDuties1"><span data-key="form_ranked_label">Rangirani dežurni (timovi)?</span></label>
+        <small id="rankedHint1" class="rankedHint" data-key="form_ranked_hint_unchecked">Ako NIJE čekirano: raspodela po standardnom algoritmu.</small>
       </div>
 
-      <div id="calendar" class="calendar">
-        <p style="grid-column: 1 / -1; text-align: center; color: #6b7280;" data-key="calendar_placeholder">
-          Izaberite mesec i godinu da biste videli kalendar
-        </p>
+      <p class="calendar-label" data-key="form_type1_dates">Dani za Tip 1:</p>
+      <div class="calendar-header" id="calendarHeader1">
+        <div data-key="day_mon">Pon</div><div data-key="day_tue">Uto</div><div data-key="day_wed">Sre</div><div data-key="day_thu">Čet</div><div data-key="day_fri">Pet</div><div data-key="day_sat">Sub</div><div data-key="day_sun">Ned</div>
+      </div>
+      <div class="calendar type1-calendar" id="calendar1">
+        <p style="grid-column:1/-1;text-align:center;color:#6b7280" data-key="calendar_placeholder_type1">Izaberite mesec i godinu za Tip 1</p>
+      </div>
+
+      <hr class="section-divider">
+
+      <!-- ===== TIP 2 TOGGLE ===== -->
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label"><input type="checkbox" id="enableType2"><span data-key="form_duty_type2_toggle">Da li je potreban dodatni tip dežurstva za druge datume?</span></label>
+      </div>
+
+      <!-- ===== TIP 2 ===== -->
+      <div id="type2Section" style="display:none;">
+        <h3 class="section-title" data-key="form_duty_type2_label">Dežurstvo - Tip 2</h3>
+
+        <div class="form-group">
+          <label for="dutyStaffCount2" data-key="form_duty_count_label">Broj dežurnih po danu:</label>
+          <input type="number" id="dutyStaffCount2" value="1" min="1" max="20">
+          <small data-key="form_duty_count_hint">Koliko ukupno dežurstava treba popuniti po danu</small>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label"><input type="checkbox" id="allowLessSpecialists2"><span data-key="form_allow_less_label">Dozvoli manje od 50% specijalista?</span></label>
+          <small id="allowLessHint2" class="allowLessHint" data-key="form_allow_less_hint_unchecked">Ako NIJE čekirano: najmanje 50% dežurnih moraju biti specijalisti.</small>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label"><input type="checkbox" id="useRankedDuties2"><span data-key="form_ranked_label">Rangirani dežurni (timovi)?</span></label>
+          <small id="rankedHint2" class="rankedHint" data-key="form_ranked_hint_unchecked">Ako NIJE čekirano: raspodela po standardnom algoritmu.</small>
+        </div>
+
+        <p class="calendar-label" data-key="form_type2_dates">Dani za Tip 2:</p>
+        <div class="calendar-header" id="calendarHeader2">
+          <div data-key="day_mon">Pon</div><div data-key="day_tue">Uto</div><div data-key="day_wed">Sre</div><div data-key="day_thu">Čet</div><div data-key="day_fri">Pet</div><div data-key="day_sat">Sub</div><div data-key="day_sun">Ned</div>
+        </div>
+        <div class="calendar type2-calendar" id="calendar2">
+          <p style="grid-column:1/-1;text-align:center;color:#6b7280" data-key="calendar_placeholder_type2">Izaberite mesec i godinu za Tip 2</p>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+
+      <!-- ===== CUSTOM NAMES ===== -->
+      <div class="form-group">
+        <label data-key="form_custom_names_label">Prilagođena imena tipova dežurstava:</label>
+        <div class="row">
+          <input type="text" id="customName1" data-key-placeholder="form_custom_name1_placeholder" placeholder="Naziv za Tip 1">
+          <input type="text" id="customName2" data-key-placeholder="form_custom_name2_placeholder" placeholder="Naziv za Tip 2" disabled>
+        </div>
       </div>
 
       <div class="spacer"></div>
 
       <div class="form-group">
-        <label for="excel" data-key="form_excel_label">📂 Otpremite Excel fajl sa spiskom lekara:</label>
-        <input type="file" id="excel" name="excel" accept=".xlsx,.xls" required>
+        <label for="excel" data-key="form_excel_label">📂 Otpremite Excel fajl:</label>
+        <input type="file" id="excel" accept=".xlsx,.xls" required>
         <small>
-          <span data-key="form_excel_hint">Dozvoljeni formati: .xlsx, .xls</span> | 
-          <a href="/demo-lekari.xlsx" style="color: #2563eb;" data-key="form_demo_link">📥 Preuzmi primer Excel fajla</a>
+          <span data-key="form_excel_hint">.xlsx, .xls</span><br>
+          <a href="/demo-lekari.xlsx" style="color:#2563eb" data-key="form_demo_link_sr">📥 Preuzmi primer (srpska zaglavlja)</a>
+          &nbsp;|&nbsp;
+          <a href="/demo-physicians.xlsx" style="color:#2563eb" data-key="form_demo_link_en">📥 Preuzmi primer (engleska zaglavlja)</a>
         </small>
       </div>
 
       <div class="spacer-small"></div>
-
       <button type="submit" id="submitBtn" data-key="form_submit">⚡ Generiši raspored</button>
     </form>
 
     <div id="status" class="status hidden"></div>
     <div id="result" class="card result"></div>
-
     <button id="downloadBtn" class="download-btn hidden" data-key="download_btn">📥 Preuzmi Excel raspored</button>
-
-    <p style="text-align: center; color: #9ca3af; font-size: 11px; margin-top: 20px;" data-key="footer_text">
-      ShiftMD v3.0 © 2026 - Sistem za raspored dežurstava
-    </p>
   </div>
+
+  <footer class="site-footer">
+    <div class="footer-cikt" data-key="footer_cikt"></div>
+    <div class="footer-university" data-key="footer_university"></div>
+    <div class="footer-version">ShiftMD v3.6</div>
+  </footer>
 
   <script src="/lang.js"></script>
   <script src="/app.js"></script>

@@ -1,7 +1,50 @@
 function parseDateList(cell) {
   if (!cell) return [];
   if (typeof cell !== 'string') return [];
-  return cell.split(",").map(v => v.trim()).filter(v => v.length > 0);
+  
+  // Podeli po zarezu, tačka-zarezu ili razmaku
+  return cell.split(/[,;]+/)
+    .map(v => v.trim())
+    .filter(v => v.length > 0)
+    .map(v => {
+      // Ako je već u formatu DD-MM-YYYY, ostavi kako jeste
+      if (/^\d{2}-\d{2}-\d{4}$/.test(v)) return v;
+      
+      // Ako je u formatu YYYY-MM-DD ili YYYY-MM-DD HH:MM:SS, konvertuj u DD-MM-YYYY
+      const isoMatch = v.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (isoMatch) {
+        const [, y, m, d] = isoMatch;
+        return `${d}-${m}-${y}`;
+      }
+      
+      // Ako je u formatu DD/MM/YYYY, konvertuj u DD-MM-YYYY
+      const slashMatch = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (slashMatch) {
+        const [, d, m, y] = slashMatch;
+        return `${d.padStart(2, '0')}-${m.padStart(2, '0')}-${y}`;
+      }
+      
+      // Ako je u formatu MM/DD/YYYY (US), konvertuj u DD-MM-YYYY
+      const usMatch = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (usMatch) {
+        const [, m, d, y] = usMatch;
+        return `${d.padStart(2, '0')}-${m.padStart(2, '0')}-${y}`;
+      }
+      
+      // Ako je samo broj (Excel serijski), pokušaj konverziju
+      const numVal = Number(v);
+      if (!isNaN(numVal) && numVal > 40000 && numVal < 60000) {
+        const excelEpoch = new Date(1899, 11, 30);
+        const date = new Date(excelEpoch.getTime() + numVal * 86400000);
+        const d = date.getDate().toString().padStart(2, '0');
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        const y = date.getFullYear();
+        return `${d}-${m}-${y}`;
+      }
+      
+      // Vrati original ako ništa ne odgovara
+      return v;
+    });
 }
 
 function shareToNumber(share) {
@@ -39,10 +82,8 @@ function shareToNumber(share) {
 }
 
 function shareToString(share) {
-  // Zaokruži na 3 decimale
   const rounded = Math.round(share * 1000) / 1000;
   
-  // Tačna poređenja sa tolerancijom
   if (rounded >= 0.999 && rounded <= 1.001) return "celo";
   if (rounded >= 0.499 && rounded <= 0.501) return "polovina";
   if (rounded >= 0.332 && rounded <= 0.335) return "trećina";
@@ -50,28 +91,20 @@ function shareToString(share) {
   if (rounded >= 0.124 && rounded <= 0.126) return "osmina";
   
   // Kombinovane vrednosti koje nastaju odsecanjem
-  // 0.875 = 1 - 0.125 (celo - osmina)
   if (rounded >= 0.874 && rounded <= 0.876) return "celo bez osmine";
-  // 0.75 = 1 - 0.25 (celo - četvrtina) = 3/4
   if (rounded >= 0.749 && rounded <= 0.751) return "tri četvrtine";
-  // 0.667 = 2/3 (celo - trećina)
   if (rounded >= 0.666 && rounded <= 0.668) return "dve trećine";
-  // 0.542 = približno polovina (0.5) + osmina (0.125) - ali zbog float-a 0.542
   if (rounded >= 0.541 && rounded <= 0.543) return "polovina i osmina";
-  // 0.375 = 3/8 (tri osmine)
   if (rounded >= 0.374 && rounded <= 0.376) return "tri osmine";
-  // 0.625 = 5/8 (pet osmina)
   if (rounded >= 0.624 && rounded <= 0.626) return "pet osmina";
-  // 0.833 = 5/6
   if (rounded >= 0.832 && rounded <= 0.834) return "pet šestina";
-  // 0.667 = 2/3
-  if (rounded >= 0.666 && rounded <= 0.668) return "dve trećine";
-  // 0.333 = 1/3
-  if (rounded >= 0.332 && rounded <= 0.335) return "trećina";
-  // 0.042 = sitno (osmina/3)
   if (rounded <= 0.05) return "minimalno";
   
-  // Ako ništa ne odgovara, prikaži kao razlomak
+  if (rounded === 1) return "celo";
+  if (rounded === 0.5) return "polovina";
+  if (rounded === 0.25) return "četvrtina";
+  if (rounded === 0.125) return "osmina";
+  
   return `${rounded}`;
 }
 

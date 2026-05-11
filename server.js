@@ -1,4 +1,4 @@
-// ShiftMD v3.0 - Server za generisanje rasporeda dežurstava
+// ShiftMD v3.6 - Server sa podrškom za dva tipa dežurstava
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
@@ -14,14 +14,8 @@ const app = express();
 const uploadsDir = path.join(__dirname, "uploads");
 const rasporediDir = path.join(__dirname, "rasporedi");
 
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-  console.log(`✅ ShiftMD: Kreiran folder uploads`);
-}
-if (!fs.existsSync(rasporediDir)) {
-  fs.mkdirSync(rasporediDir, { recursive: true });
-  console.log(`✅ ShiftMD: Kreiran folder rasporedi`);
-}
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+if (!fs.existsSync(rasporediDir)) fs.mkdirSync(rasporediDir, { recursive: true });
 
 const upload = multer({ dest: uploadsDir });
 
@@ -30,220 +24,124 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/rasporedi", express.static(rasporediDir));
 
-// ===== RUTE ZA STRANICE =====
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-app.get("/o-sistemu", (req, res) => {
-  res.sendFile(path.join(__dirname, "o-sistemu.html"));
-});
-
-app.get("/uputstvo", (req, res) => {
-  res.sendFile(path.join(__dirname, "uputstvo.html"));
-});
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
+app.get("/o-sistemu", (req, res) => res.sendFile(path.join(__dirname, "o-sistemu.html")));
+app.get("/uputstvo", (req, res) => res.sendFile(path.join(__dirname, "uputstvo.html")));
 
 app.get("/demo-lekari.xlsx", (req, res) => {
-  const demoPath = path.join(__dirname, "demo-lekari.xlsx");
-  if (fs.existsSync(demoPath)) {
-    res.setHeader("Content-Disposition", "attachment; filename=demo-lekari.xlsx");
-    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    const fileStream = fs.createReadStream(demoPath);
-    fileStream.on("error", (err) => {
-      if (!res.headersSent) res.status(500).send("Greška pri čitanju demo fajla.");
-    });
-    fileStream.pipe(res);
-  } else {
-    res.status(404).send("Demo fajl nije pronađen. Pokrenite 'node create-demo-excel.js' da ga kreirate.");
-  }
+  const p = path.join(__dirname, "demo-lekari.xlsx");
+  if (fs.existsSync(p)) { res.setHeader("Content-Disposition", "attachment; filename=demo-lekari.xlsx"); res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); fs.createReadStream(p).pipe(res); }
+  else res.status(404).send("Demo nije pronađen.");
+});
+app.get("/demo-physicians.xlsx", (req, res) => {
+  const p = path.join(__dirname, "demo-lekari.xlsx");
+  if (fs.existsSync(p)) { res.setHeader("Content-Disposition", "attachment; filename=demo-physicians.xlsx"); res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); fs.createReadStream(p).pipe(res); }
+  else res.status(404).send("Demo file not found.");
 });
 
-// ===== API RUTE =====
-app.get("/download/:filename", (req, res) => {
-  const filename = req.params.filename;
-  const filePath = path.join(rasporediDir, filename);
-  
-  console.log(`📥 ShiftMD: Preuzimanje ${filename}`);
-  
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).send("Fajl nije pronađen.");
-  }
-  
-  const stats = fs.statSync(filePath);
-  
-  res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(filename)}"`);
+app.get("/download/:f", (req, res) => {
+  const p = path.join(rasporediDir, req.params.f);
+  if (!fs.existsSync(p)) return res.status(404).send("Nije pronađen.");
+  res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(req.params.f)}"`);
   res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-  res.setHeader("Content-Length", stats.size);
-  
-  const fileStream = fs.createReadStream(filePath);
-  fileStream.on("error", (err) => {
-    if (!res.headersSent) res.status(500).send("Greška pri čitanju fajla.");
-  });
-  fileStream.pipe(res);
+  fs.createReadStream(p).pipe(res);
 });
 
 app.post("/generate", upload.single("excel"), async (req, res) => {
   try {
-    const { hospital, month, year, dutyDates, dutyStaffCount, allowLessSpecialists } = req.body;
+    const { hospital, month, year, dutyDates1, dutyStaffCount1, allowLessSpecialists1, useRankedDuties1, enableType2, dutyDates2, dutyStaffCount2, allowLessSpecialists2, useRankedDuties2, customName1, customName2 } = req.body;
     
-    if (!hospital || !month || !year || !dutyDates) {
-      return res.status(400).json({ error: "Nedostaju obavezni podaci." });
-    }
-    if (!req.file) {
-      return res.status(400).json({ error: "Excel fajl nije otpremljen." });
+    if (!hospital || !month || !year || !dutyDates1) return res.status(400).json({ error: "Nedostaju obavezni podaci." });
+    if (!req.file) return res.status(400).json({ error: "Excel nije otpremljen." });
+
+    let dates1; try { dates1 = JSON.parse(dutyDates1); } catch (e) { return res.status(400).json({ error: "Neispravni datumi za Tip 1." }); }
+    if (!Array.isArray(dates1) || dates1.length === 0) return res.status(400).json({ error: "Morate izabrati bar jedan dan za Tip 1." });
+
+    const hasType2 = enableType2 === "true";
+    let dates2 = [];
+    
+    if (hasType2) {
+      try { dates2 = JSON.parse(dutyDates2); } catch (e) { return res.status(400).json({ error: "Neispravni datumi za Tip 2." }); }
+      if (!Array.isArray(dates2) || dates2.length === 0) return res.status(400).json({ error: "Morate izabrati bar jedan dan za Tip 2." });
+      for (const d of dates1) { if (dates2.includes(d)) return res.status(400).json({ error: `Datum ${d} se preklapa između Tip 1 i Tip 2!` }); }
     }
 
-    let dates;
-    try { dates = JSON.parse(dutyDates); } catch (e) {
-      return res.status(400).json({ error: "Neispravan format datuma." });
-    }
-    if (!Array.isArray(dates) || dates.length === 0) {
-      return res.status(400).json({ error: "Nema izabranih datuma." });
-    }
+    const staffCount1 = parseInt(dutyStaffCount1) || 1;
+    const allowLess1 = allowLessSpecialists1 === "true";
+    const useRanked1 = useRankedDuties1 === "true";
+    
+    const staffCount2 = hasType2 ? (parseInt(dutyStaffCount2) || 1) : 0;
+    const allowLess2 = hasType2 ? (allowLessSpecialists2 === "true") : false;
+    const useRanked2 = hasType2 ? (useRankedDuties2 === "true") : false;
 
-    const staffCount = parseInt(dutyStaffCount) || 1;
-    const allowLess = allowLessSpecialists === "true";
-    
-    console.log("");
-    console.log("═".repeat(60));
-    console.log("🩺 ShiftMD v3.0 - GENERISANJE RASPOREDA");
-    console.log("═".repeat(60));
-    console.log(`   Ustanova: ${hospital} | ${month}/${year}`);
-    console.log(`   Datuma: ${dates.length} | Dežurstava/dan: ${staffCount}`);
-    console.log(`   Opušteno pravilo: ${allowLess ? 'DA' : 'NE'}`);
-    
+    const type1Name = customName1 || "Tip 1";
+    const type2Name = customName2 || "Tip 2";
+
+    console.log(`\n🩺 ShiftMD v3.6 - ${hospital} | ${month}/${year}`);
+    console.log(`   ${type1Name}: ${dates1.length} dana, ${staffCount1} dežurstava/dan${useRanked1 ? ', rangirani' : ''}`);
+    if (hasType2) console.log(`   ${type2Name}: ${dates2.length} dana, ${staffCount2} dežurstava/dan${useRanked2 ? ', rangirani' : ''}`);
+
     const employees = await parseExcel(req.file.path);
-    console.log(`   ✅ Učitano zaposlenih: ${employees.length}`);
-    
-    const schedule = generateSchedule(employees, dates, staffCount, allowLess);
-    console.log(`   ✅ Raspored generisan`);
+    console.log(`   ✅ Učitano ${employees.length} lekara`);
 
-    const sortedDates = [...dates].sort((a, b) => {
+    const schedule1 = generateSchedule(employees, dates1, staffCount1, allowLess1, useRanked1);
+    let schedule2 = {};
+    if (hasType2) {
+      schedule2 = generateSchedule(employees, dates2, staffCount2, allowLess2, useRanked2);
+    }
+
+    const schedule = { ...schedule1, ...schedule2 };
+    const dutyTypes = {};
+    dates1.forEach(d => dutyTypes[d] = type1Name);
+    dates2.forEach(d => dutyTypes[d] = type2Name);
+
+    const allDates = [...dates1, ...dates2].sort((a, b) => {
       const [da, ma, ya] = a.split("-").map(Number);
       const [db, mb, yb] = b.split("-").map(Number);
       return new Date(ya, ma - 1, da) - new Date(yb, mb - 1, db);
     });
 
     const now = new Date();
-    const timestamp = now.toISOString().replace(/[:.]/g, "-").substring(0, 19);
-    const safeHospitalName = hospital
-      .replace(/[^a-zA-Z0-9čćžšđČĆŽŠĐ\s]/g, "")
-      .replace(/\s+/g, "_")
-      .substring(0, 50);
-    const excelFilename = `${safeHospitalName}_-_${timestamp}.xlsx`;
-    const excelPath = path.join(rasporediDir, excelFilename);
+    const ts = now.toISOString().replace(/[:.]/g, "-").substring(0, 19);
+    const name = hospital.replace(/[^a-zA-Z0-9čćžšđČĆŽŠĐ\s]/g, "").replace(/\s+/g, "_").substring(0, 50);
+    const xlFile = `${name}_-_${ts}.xlsx`;
+    const xlPath = path.join(rasporediDir, xlFile);
 
-    const resultData = { 
-      hospital, month, year, 
-      dutyStaffCount: staffCount,
-      allowLessSpecialists: allowLess,
-      schedule 
-    };
+    const resultData = { hospital, month, year, schedule, dutyTypes, hasType2, type1Name, type2Name, staffCount1, staffCount2, allowLess1, allowLess2, useRanked1, useRanked2 };
 
-    const trackingEntries = employees.map(emp => ({
-      name: emp.name,
-      role: emp.role,
-      totalAssignedShare: emp.totalAssignedShare || 0,
-      assignedDates: emp.assignedDates || [],
-      dutyCount: emp.dutyCount || emp.assignedDates?.length || 0,
-      weekendCount: emp.weekendCount || 0,
-      canBeChief: emp.canBeChief,
-      seniority: emp.seniority || 0
+    const tracking = employees.map(e => ({
+      name: e.name, role: e.role, totalAssignedShare: e.totalAssignedShare || 0,
+      assignedDates: e.assignedDates || [], dutyCount: e.dutyCount || e.assignedDates?.length || 0,
+      weekendCount: e.weekendCount || 0, canBeChief: e.canBeChief, seniority: e.seniority || 0, rank: e.rank || 0
     }));
+    const stats = { entries: tracking, firstDate: allDates[0] || "", lastDate: allDates[allDates.length-1] || "", totalDays: allDates.length };
 
-    const statistics = {
-      entries: trackingEntries,
-      firstDate: sortedDates[0] || "",
-      lastDate: sortedDates[sortedDates.length - 1] || "",
-      totalDays: sortedDates.length,
-      totalDutySlots: staffCount * sortedDates.length,
-      totalWeekendDays: sortedDates.filter(d => isWeekend(d)).length
-    };
-    
-    await generateExcel(resultData, excelPath, statistics);
-    
-    if (!fs.existsSync(excelPath)) {
-      throw new Error("Excel fajl nije uspešno kreiran.");
-    }
-    
-    const fileStats = fs.statSync(excelPath);
-    console.log(`   ✅ Excel: ${excelFilename} (${(fileStats.size / 1024).toFixed(1)} KB)`);
-    console.log("═".repeat(60));
-    console.log("");
+    await generateExcel(resultData, xlPath, stats);
+    if (!fs.existsSync(xlPath)) throw new Error("Excel nije kreiran.");
 
+    const fStats = fs.statSync(xlPath);
+    console.log(`   ✅ ${xlFile} (${(fStats.size/1024).toFixed(1)} KB)\n`);
     try { fs.unlinkSync(req.file.path); } catch (e) {}
-    
+
     res.json({
-      hospital, month, year, 
-      dutyStaffCount: staffCount,
-      allowLessSpecialists: allowLess,
+      hospital, month, year,
       schedule,
-      excelFile: excelFilename,
-      excelSize: fileStats.size,
-      generatedAt: now.toISOString()
+      dutyTypes,
+      hasType2,
+      type1Name, type2Name,
+      type1Count: dates1.length, type2Count: dates2.length,
+      staffCount1, staffCount2,
+      useRanked1, useRanked2,
+      allowLess1, allowLess2,
+      excelFile: xlFile, excelSize: fStats.size, generatedAt: now.toISOString()
     });
-    
   } catch (err) {
-    console.error("❌ ShiftMD greška:", err.message);
-    if (req.file && req.file.path) {
-      try { fs.unlinkSync(req.file.path); } catch (e) {}
-    }
+    console.error("❌", err.message);
+    if (req.file?.path) try { fs.unlinkSync(req.file.path); } catch (e) {}
     res.status(400).json({ error: err.message });
   }
 });
 
-app.get("/rasporedi-list", (req, res) => {
-  try {
-    if (!fs.existsSync(rasporediDir)) return res.json([]);
-    
-    const files = fs.readdirSync(rasporediDir)
-      .filter(f => f.endsWith(".xlsx"))
-      .map(f => {
-        const filePath = path.join(rasporediDir, f);
-        const fileStats = fs.statSync(filePath);
-        return {
-          filename: f,
-          size: fileStats.size,
-          sizeFormatted: formatFileSize(fileStats.size),
-          created: fileStats.birthtime,
-          modified: fileStats.mtime,
-          url: `/download/${encodeURIComponent(f)}`
-        };
-      })
-      .sort((a, b) => new Date(b.created) - new Date(a.created));
-    
-    res.json(files);
-  } catch (err) {
-    res.status(500).json({ error: "Greška pri čitanju foldera." });
-  }
-});
-
-function formatFileSize(bytes) {
-  if (!bytes || bytes === 0) return '0 B';
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-}
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("");
-  console.log("╔══════════════════════════════════════════════╗");
-  console.log("║        🩺 ShiftMD v3.0 - POKRENUT           ║");
-  console.log("╠══════════════════════════════════════════════╣");
-  console.log(`║  URL: http://localhost:${PORT}                  ║`);
-  console.log("║  /              - Početna strana            ║");
-  console.log("║  /o-sistemu     - O sistemu                 ║");
-  console.log("║  /uputstvo      - Uputstvo                  ║");
-  console.log("║  Jezici: srpski, engleski                  ║");
-  console.log("║  Udeli: celo, polovina, trećina,            ║");
-  console.log("║         četvrtina, osmina                   ║");
-  console.log("╚══════════════════════════════════════════════╝");
-  console.log("");
-});
-
-process.on("SIGINT", () => {
-  console.log("");
-  console.log("🛑 ShiftMD: Server se zaustavlja...");
-  process.exit(0);
-});
+app.listen(PORT, () => console.log(`\n🩺 ShiftMD v3.6 na http://localhost:${PORT}\n`));
+process.on("SIGINT", () => { console.log("\n🛑 Zaustavljam..."); process.exit(0); });
