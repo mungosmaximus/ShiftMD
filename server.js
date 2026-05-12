@@ -49,7 +49,7 @@ app.get("/download/:f", (req, res) => {
 
 app.post("/generate", upload.single("excel"), async (req, res) => {
   try {
-    const { hospital, month, year, dutyDates1, dutyStaffCount1, allowLessSpecialists1, useRankedDuties1, enableType2, dutyDates2, dutyStaffCount2, allowLessSpecialists2, useRankedDuties2, customName1, customName2 } = req.body;
+    const { hospital, month, year, dutyDates1, dutyStaffCount1, allowLessSpecialists1, useRankedDuties1, enableType2, dutyDates2, dutyStaffCount2, allowLessSpecialists2, useRankedDuties2, customName1, customName2, outputLang } = req.body;
     
     if (!hospital || !month || !year || !dutyDates1) return res.status(400).json({ error: "Nedostaju obavezni podaci." });
     if (!req.file) return res.status(400).json({ error: "Excel nije otpremljen." });
@@ -74,26 +74,53 @@ app.post("/generate", upload.single("excel"), async (req, res) => {
     const allowLess2 = hasType2 ? (allowLessSpecialists2 === "true") : false;
     const useRanked2 = hasType2 ? (useRankedDuties2 === "true") : false;
 
-    const type1Name = customName1 || "Tip 1";
-    const type2Name = customName2 || "Tip 2";
+    const lang = outputLang || "sr";
+    const type1Name = customName1 || (lang === "en" ? "Type 1" : "Tip 1");
+    const type2Name = customName2 || (lang === "en" ? "Type 2" : "Tip 2");
 
-    console.log(`\n🩺 ShiftMD v3.6 - ${hospital} | ${month}/${year}`);
+    console.log(`\n🩺 ShiftMD v3.6 - ${hospital} | ${month}/${year} | Jezik: ${lang}`);
     console.log(`   ${type1Name}: ${dates1.length} dana, ${staffCount1} dežurstava/dan${useRanked1 ? ', rangirani' : ''}`);
     if (hasType2) console.log(`   ${type2Name}: ${dates2.length} dana, ${staffCount2} dežurstava/dan${useRanked2 ? ', rangirani' : ''}`);
 
-    const employees = await parseExcel(req.file.path);
-    console.log(`   ✅ Učitano ${employees.length} lekara`);
+    const employeesOriginal = await parseExcel(req.file.path);
+    console.log(`   ✅ Učitano ${employeesOriginal.length} lekara`);
 
-    const schedule1 = generateSchedule(employees, dates1, staffCount1, allowLess1, useRanked1);
+    // Duboke kopije za Tip 1 i Tip 2
+    const employees1 = employeesOriginal.map(e => ({ ...e, assignedDates: [], weekendCount: 0, totalAssignedShare: 0, lastDutyDate: null, dutyCount: 0, weekendDutyCount: 0 }));
+    const employees2 = hasType2 ? employeesOriginal.map(e => ({ ...e, assignedDates: [], weekendCount: 0, totalAssignedShare: 0, lastDutyDate: null, dutyCount: 0, weekendDutyCount: 0 })) : [];
+
+    // Generiši raspored za Tip 1
+    const schedule1 = generateSchedule(employees1, dates1, staffCount1, allowLess1, useRanked1);
+    
+    // Generiši raspored za Tip 2 (sa svežom kopijom)
     let schedule2 = {};
     if (hasType2) {
-      schedule2 = generateSchedule(employees, dates2, staffCount2, allowLess2, useRanked2);
+      schedule2 = generateSchedule(employees2, dates2, staffCount2, allowLess2, useRanked2);
     }
 
+    // Spoji rasporede
     const schedule = { ...schedule1, ...schedule2 };
     const dutyTypes = {};
     dates1.forEach(d => dutyTypes[d] = type1Name);
     dates2.forEach(d => dutyTypes[d] = type2Name);
+
+    // Spoji statistike iz oba tipa
+    const allEmployees = employeesOriginal.map((emp, i) => {
+      const emp1 = employees1[i];
+      const emp2 = hasType2 ? employees2[i] : null;
+      
+      return {
+        name: emp.name,
+        role: emp.role,
+        totalAssignedShare: (emp1.totalAssignedShare || 0) + (emp2 ? emp2.totalAssignedShare || 0 : 0),
+        assignedDates: [...(emp1.assignedDates || []), ...(emp2 ? emp2.assignedDates || [] : [])],
+        dutyCount: (emp1.dutyCount || emp1.assignedDates?.length || 0) + (emp2 ? emp2.dutyCount || emp2.assignedDates?.length || 0 : 0),
+        weekendCount: (emp1.weekendCount || 0) + (emp2 ? emp2.weekendCount || 0 : 0),
+        canBeChief: emp.canBeChief,
+        seniority: emp.seniority || 0,
+        rank: emp.rank || 0
+      };
+    });
 
     const allDates = [...dates1, ...dates2].sort((a, b) => {
       const [da, ma, ya] = a.split("-").map(Number);
@@ -107,14 +134,24 @@ app.post("/generate", upload.single("excel"), async (req, res) => {
     const xlFile = `${name}_-_${ts}.xlsx`;
     const xlPath = path.join(rasporediDir, xlFile);
 
-    const resultData = { hospital, month, year, schedule, dutyTypes, hasType2, type1Name, type2Name, staffCount1, staffCount2, allowLess1, allowLess2, useRanked1, useRanked2 };
+    // KLJUČNO: dutyTypes mora biti u resultData!
+    const resultData = { 
+      hospital, month, year, schedule, 
+      dutyTypes,        // ← OVO JE FALILO!
+      hasType2, 
+      type1Name, type2Name, 
+      staffCount1, staffCount2, 
+      allowLess1, allowLess2, 
+      useRanked1, useRanked2,
+      outputLang: lang
+    };
 
-    const tracking = employees.map(e => ({
-      name: e.name, role: e.role, totalAssignedShare: e.totalAssignedShare || 0,
-      assignedDates: e.assignedDates || [], dutyCount: e.dutyCount || e.assignedDates?.length || 0,
-      weekendCount: e.weekendCount || 0, canBeChief: e.canBeChief, seniority: e.seniority || 0, rank: e.rank || 0
-    }));
-    const stats = { entries: tracking, firstDate: allDates[0] || "", lastDate: allDates[allDates.length-1] || "", totalDays: allDates.length };
+    const stats = { 
+      entries: allEmployees, 
+      firstDate: allDates[0] || "", 
+      lastDate: allDates[allDates.length-1] || "", 
+      totalDays: allDates.length 
+    };
 
     await generateExcel(resultData, xlPath, stats);
     if (!fs.existsSync(xlPath)) throw new Error("Excel nije kreiran.");
@@ -125,9 +162,7 @@ app.post("/generate", upload.single("excel"), async (req, res) => {
 
     res.json({
       hospital, month, year,
-      schedule,
-      dutyTypes,
-      hasType2,
+      schedule, dutyTypes, hasType2,
       type1Name, type2Name,
       type1Count: dates1.length, type2Count: dates2.length,
       staffCount1, staffCount2,

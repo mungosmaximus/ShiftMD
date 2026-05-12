@@ -85,7 +85,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
   
-  // ===== DOM ELEMENTI =====
   const calendar1El = document.getElementById("calendar1");
   const calendar2El = document.getElementById("calendar2");
   const monthEl = document.getElementById("month");
@@ -242,7 +241,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("rankedHint2").textContent = t(currentLang, this.checked ? "form_ranked_hint_checked" : "form_ranked_hint_unchecked");
   });
 
-  // ===== FORM SUBMIT =====
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
     clearStatus();
@@ -294,6 +292,7 @@ document.addEventListener("DOMContentLoaded", function () {
       
       fd.append("customName1", document.getElementById("customName1").value || "");
       fd.append("customName2", document.getElementById("customName2").value || "");
+      fd.append("outputLang", currentLang);
 
       const startTime = performance.now();
       const res = await fetch("/generate", { method: "POST", body: fd });
@@ -314,7 +313,6 @@ document.addEventListener("DOMContentLoaded", function () {
       formattedSchedule += `${t(currentLang, "result_hospital")}: ${data.hospital}\n`;
       formattedSchedule += `${t(currentLang, "result_month")}: ${data.month}/${data.year}\n`;
       
-      // Prikaži info o tipovima
       if (data.type1Name) {
         formattedSchedule += `\n▸ ${data.type1Name}: ${data.type1Count || 0} dana, ${data.staffCount1 || 0} dežurstava/dan`;
         if (data.useRanked1) formattedSchedule += ` (rangirani timovi)`;
@@ -330,7 +328,6 @@ document.addEventListener("DOMContentLoaded", function () {
       formattedSchedule += "═".repeat(50) + "\n\n";
 
       if (data.schedule && Object.keys(data.schedule).length > 0) {
-        // Grupiši datume po tipu
         const datesByType = {};
         if (data.dutyTypes) {
           for (const [date, typeLabel] of Object.entries(data.dutyTypes)) {

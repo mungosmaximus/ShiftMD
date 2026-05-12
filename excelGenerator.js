@@ -1,4 +1,4 @@
-// ShiftMD v3.6 - Dvojezični Excel Generator sa dva tipa dežurstava
+// ShiftMD v3.6 - Dvojezični Excel Generator
 const ExcelJS = require("exceljs");
 
 const MONTHS = {
@@ -21,9 +21,9 @@ const T = {
     stats_load: "Opterećenje (skor)", stats_duties: "Broj dežurstava", stats_weekends: "Vikend dežurstva",
     max: "Maksimum", avg: "Prosek", min: "Minimum",
     total_doctors: "Ukupno lekara", with_duties: "Sa dežurstvima", without: "Bez",
-    period_label: "Period", days: "dana", duty_slot: "Dežurstvo", chief: "GLAVNI DEŽURNI",
+    period_label: "Period", days: "dana", duty_slot: "Dežurni", chief: "GLAVNI DEŽURNI",
     specialist: "Specijalista", resident: "Specijalizant", yes: "DA", no: "NE",
-    header_date: "Datum", header_day: "Dan", header_slot: "Dežurstvo",
+    header_date: "Datum", header_day: "Dan", header_slot: "Dežurni",
     header_name: "Ime i prezime", header_type: "Tip", header_share: "Udeo",
     header_chief: "Glavni dežurni", header_rank: "Rang", header_duty_type: "Tip dežurstva",
     footer: "ShiftMD v3.6",
@@ -37,13 +37,20 @@ const T = {
     stats_load: "Workload (score)", stats_duties: "Number of Duties", stats_weekends: "Weekend Duties",
     max: "Maximum", avg: "Average", min: "Minimum",
     total_doctors: "Total Physicians", with_duties: "With Duties", without: "Without",
-    period_label: "Period", days: "days", duty_slot: "Duty", chief: "CHIEF ON CALL",
+    period_label: "Period", days: "days", duty_slot: "On-call", chief: "CHIEF ON CALL",
     specialist: "Specialist", resident: "Resident", yes: "YES", no: "NO",
-    header_date: "Date", header_day: "Day", header_slot: "Duty",
+    header_date: "Date", header_day: "Day", header_slot: "On-call",
     header_name: "Full Name", header_type: "Type", header_share: "Share",
     header_chief: "Chief on Call", header_rank: "Rank", header_duty_type: "Duty Type",
     footer: "ShiftMD v3.6",
   }
+};
+
+const COLORS = {
+  first_row_bg: "FFDBEAFE",  // Svetlo plava za prvi red dana
+  chief_bg: "FFF0FDF4",      // Glavni dežurni - zelenkasta
+  text_black: "FF1F2937",    // Crna boja za sav tekst
+  white: "FFFFFFFF",         // Bela
 };
 
 function detectLanguage(hospital) {
@@ -58,9 +65,9 @@ function detectLanguage(hospital) {
 }
 
 module.exports = async function generateExcel(data, filePath, statistics = null) {
-  const { hospital, month, year, schedule, dutyTypes, hasType2, type1Name, type2Name, staffCount1, staffCount2, allowLess1, allowLess2, useRanked1, useRanked2 } = data;
+  const { hospital, month, year, schedule, dutyTypes, hasType2, type1Name, type2Name, staffCount1, staffCount2, allowLess1, allowLess2, useRanked1, useRanked2, outputLang } = data;
   
-  const lang = detectLanguage(hospital);
+  const lang = outputLang || detectLanguage(hospital);
   const dict = T[lang];
   const months = MONTHS[lang];
   const days = DAYS[lang];
@@ -78,7 +85,9 @@ module.exports = async function generateExcel(data, filePath, statistics = null)
     return new Date(ya, ma - 1, da) - new Date(yb, mb - 1, db);
   });
   
-  // ===== SHEET 1: RASPORED =====
+  // =====================================================================
+  // SHEET 1: RASPORED
+  // =====================================================================
   const wsSchedule = workbook.addWorksheet(dict.sheet_raspored, {
     pageSetup: { orientation: "landscape", paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0, margins: { left: 1.5, right: 1.5, top: 1.5, bottom: 1.5, header: 0.5, footer: 0.5 } }
   });
@@ -89,7 +98,7 @@ module.exports = async function generateExcel(data, filePath, statistics = null)
   
   wsSchedule.mergeCells(`A${r}:D${r}`);
   wsSchedule.getCell(`A${r}`).value = dict.title;
-  wsSchedule.getCell(`A${r}`).font = { bold: true, size: 20, name: "Arial", color: { argb: "FF1E3A5F" } };
+  wsSchedule.getCell(`A${r}`).font = { bold: true, size: 20, name: "Arial", color: { argb: COLORS.text_black } };
   wsSchedule.getCell(`A${r}`).alignment = { horizontal: "center", vertical: "middle" };
   wsSchedule.getRow(r).height = 35; r++;
   
@@ -101,17 +110,15 @@ module.exports = async function generateExcel(data, filePath, statistics = null)
   
   wsSchedule.mergeCells(`A${r}:D${r}`);
   wsSchedule.getCell(`A${r}`).value = dict.period ? `${monthName} ${year}. ${dict.period}` : `${monthName} ${year}`;
-  wsSchedule.getCell(`A${r}`).font = { bold: true, size: 14, name: "Arial", color: { argb: "FF1F2937" } };
+  wsSchedule.getCell(`A${r}`).font = { bold: true, size: 14, name: "Arial", color: { argb: COLORS.text_black } };
   wsSchedule.getCell(`A${r}`).alignment = { horizontal: "center", vertical: "middle" };
   wsSchedule.getRow(r).height = 25; r++;
   
-  // Info o tipovima
-  let infoText = `${type1Name || dict.duty_slot + " 1"}: ${dict.duty_count}: ${staffCount1 || 1}`;
+  let infoText = `${type1Name || "Tip 1"}: ${dict.duty_count}: ${staffCount1 || 1}`;
   if (allowLess1) infoText += ` | ${dict.rule_relaxed}`; else infoText += ` | ${dict.rule_strict}`;
   if (useRanked1) infoText += ` | Rangirani: DA`;
-  
   if (hasType2) {
-    infoText += `\n${type2Name || dict.duty_slot + " 2"}: ${dict.duty_count}: ${staffCount2 || 1}`;
+    infoText += `\n${type2Name || "Tip 2"}: ${dict.duty_count}: ${staffCount2 || 1}`;
     if (allowLess2) infoText += ` | ${dict.rule_relaxed}`; else infoText += ` | ${dict.rule_strict}`;
     if (useRanked2) infoText += ` | Rangirani: DA`;
   }
@@ -120,32 +127,29 @@ module.exports = async function generateExcel(data, filePath, statistics = null)
   wsSchedule.getCell(`A${r}`).value = infoText;
   wsSchedule.getCell(`A${r}`).font = { size: 10, name: "Arial", color: { argb: "FF6B7280" } };
   wsSchedule.getCell(`A${r}`).alignment = { horizontal: "center" };
-  wsSchedule.getRow(r).height = hasType2 ? 35 : 20;
-  r++;
+  wsSchedule.getRow(r).height = hasType2 ? 35 : 20; r++;
   
   wsSchedule.mergeCells(`A${r}:D${r}`);
   wsSchedule.getCell(`A${r}`).value = `${dict.generated}: ${genDate.toLocaleDateString("sr-RS")} ${genDate.toLocaleTimeString("sr-RS")} | ${dict.footer}`;
   wsSchedule.getCell(`A${r}`).font = { size: 8, name: "Arial", color: { argb: "FF9CA3AF" } };
-  wsSchedule.getCell(`A${r}`).alignment = { horizontal: "center" };
-  r++; r++;
+  wsSchedule.getCell(`A${r}`).alignment = { horizontal: "center" }; r++; r++;
   
   // STATISTIKA
   if (statistics && statistics.entries && statistics.entries.length > 0) {
     wsSchedule.mergeCells(`A${r}:D${r}`);
     wsSchedule.getCell(`A${r}`).value = dict.stats_title;
-    wsSchedule.getCell(`A${r}`).font = { bold: true, size: 12, name: "Arial", color: { argb: "FF374151" } };
-    r++;
+    wsSchedule.getCell(`A${r}`).font = { bold: true, size: 12, name: "Arial", color: { argb: COLORS.text_black } }; r++;
     
     const E = statistics.entries;
-    const maxL = Math.max(...E.map(e => e.totalAssignedShare));
-    const minL = Math.min(...E.map(e => e.totalAssignedShare));
-    const avgL = E.reduce((s, e) => s + e.totalAssignedShare, 0) / E.length;
-    const maxD = Math.max(...E.map(e => e.dutyCount || e.assignedDates.length));
-    const minD = Math.min(...E.map(e => e.dutyCount || e.assignedDates.length));
-    const avgD = E.reduce((s, e) => s + (e.dutyCount || e.assignedDates.length), 0) / E.length;
-    const maxW = Math.max(...E.map(e => e.weekendCount));
-    const minW = Math.min(...E.map(e => e.weekendCount));
-    const avgW = E.reduce((s, e) => s + e.weekendCount, 0) / E.length;
+    const maxL = Math.max(...E.map(e => e.totalAssignedShare || 0));
+    const minL = Math.min(...E.map(e => e.totalAssignedShare || 0));
+    const avgL = E.reduce((s, e) => s + (e.totalAssignedShare || 0), 0) / E.length;
+    const maxD = Math.max(...E.map(e => e.dutyCount || e.assignedDates?.length || 0));
+    const minD = Math.min(...E.map(e => e.dutyCount || e.assignedDates?.length || 0));
+    const avgD = E.reduce((s, e) => s + (e.dutyCount || e.assignedDates?.length || 0), 0) / E.length;
+    const maxW = Math.max(...E.map(e => e.weekendCount || 0));
+    const minW = Math.min(...E.map(e => e.weekendCount || 0));
+    const avgW = E.reduce((s, e) => s + (e.weekendCount || 0), 0) / E.length;
     
     ["", dict.stats_load, dict.stats_duties, dict.stats_weekends].forEach((h, i) => {
       const cell = wsSchedule.getCell(r, i + 1);
@@ -154,8 +158,7 @@ module.exports = async function generateExcel(data, filePath, statistics = null)
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF374151" } };
       cell.alignment = { horizontal: "center", vertical: "middle" };
       cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-    });
-    r++;
+    }); r++;
     
     [
       [dict.max, maxL.toFixed(2), String(maxD), String(maxW), "FFFEE2E2"],
@@ -165,60 +168,45 @@ module.exports = async function generateExcel(data, filePath, statistics = null)
       row.slice(0, 4).forEach((val, i) => {
         const cell = wsSchedule.getCell(r, i + 1);
         cell.value = val;
-        cell.font = { size: 11, name: "Arial" };
+        cell.font = { size: 11, name: "Arial", color: { argb: COLORS.text_black } };
         cell.alignment = { horizontal: "center", vertical: "middle" };
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: row[4] } };
         cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-      });
-      r++;
+      }); r++;
     });
     
-    const loaded = E.filter(e => e.totalAssignedShare > 0).length;
+    const loaded = E.filter(e => (e.totalAssignedShare || 0) > 0).length;
     wsSchedule.mergeCells(`A${r}:D${r}`);
     wsSchedule.getCell(`A${r}`).value = `${dict.total_doctors}: ${E.length} | ${dict.with_duties}: ${loaded} | ${dict.without}: ${E.length - loaded}`;
-    wsSchedule.getCell(`A${r}`).font = { size: 9, name: "Arial", color: { argb: "FF6B7280" } };
-    wsSchedule.getCell(`A${r}`).alignment = { horizontal: "center" };
-    r++;
+    wsSchedule.getCell(`A${r}`).font = { size: 9, name: "Arial", color: { argb: "FF6B7280" } }; wsSchedule.getCell(`A${r}`).alignment = { horizontal: "center" }; r++;
     
     wsSchedule.mergeCells(`A${r}:D${r}`);
     wsSchedule.getCell(`A${r}`).value = `${dict.period_label}: ${statistics.firstDate || "—"} ${lang === 'sr' ? 'do' : 'to'} ${statistics.lastDate || "—"} (${statistics.totalDays || 0} ${dict.days})`;
-    wsSchedule.getCell(`A${r}`).font = { size: 9, name: "Arial", color: { argb: "FF9CA3AF" } };
-    wsSchedule.getCell(`A${r}`).alignment = { horizontal: "center" };
-    r++; r++;
+    wsSchedule.getCell(`A${r}`).font = { size: 9, name: "Arial", color: { argb: "FF9CA3AF" } }; wsSchedule.getCell(`A${r}`).alignment = { horizontal: "center" }; r++; r++;
     
     wsSchedule.mergeCells(`A${r}:D${r}`);
     wsSchedule.getCell(`A${r}`).value = "═".repeat(100);
-    wsSchedule.getCell(`A${r}`).font = { size: 8, name: "Arial", color: { argb: "FFD1D5DB" } };
-    wsSchedule.getCell(`A${r}`).alignment = { horizontal: "center" };
-    r++; r++;
+    wsSchedule.getCell(`A${r}`).font = { size: 8, name: "Arial", color: { argb: "FFD1D5DB" } }; wsSchedule.getCell(`A${r}`).alignment = { horizontal: "center" }; r++; r++;
   }
   
-  // RASPORED - Grupisan po tipovima
+  // RASPORED
   const datesByType = {};
   for (const [date, typeLabel] of Object.entries(dutyTypes || {})) {
     if (!datesByType[typeLabel]) datesByType[typeLabel] = [];
     datesByType[typeLabel].push(date);
   }
-  
-  if (Object.keys(datesByType).length === 0) {
-    datesByType["Dežurstva"] = dates;
-  }
+  if (Object.keys(datesByType).length === 0) datesByType[lang === 'en' ? "Duties" : "Dežurstva"] = dates;
   
   for (const [typeLabel, typeDates] of Object.entries(datesByType)) {
-    // Labela tipa
     if (Object.keys(datesByType).length > 1) {
       wsSchedule.mergeCells(`A${r}:D${r}`);
-      const typeCell = wsSchedule.getCell(`A${r}`);
-      typeCell.value = `▸ ${typeLabel}`;
-      typeCell.font = { bold: true, size: 14, name: "Arial", color: { argb: "FF2563EB" } };
-      typeCell.alignment = { horizontal: "left", vertical: "middle" };
-      wsSchedule.getRow(r).height = 25;
-      r++;
+      wsSchedule.getCell(`A${r}`).value = `▸ ${typeLabel}`;
+      wsSchedule.getCell(`A${r}`).font = { bold: true, size: 14, name: "Arial", color: { argb: "FF2563EB" } };
+      wsSchedule.getCell(`A${r}`).alignment = { horizontal: "left", vertical: "middle" }; wsSchedule.getRow(r).height = 25; r++;
     }
     
     typeDates.sort((a, b) => {
-      const [da, ma, ya] = a.split("-").map(Number);
-      const [db, mb, yb] = b.split("-").map(Number);
+      const [da, ma, ya] = a.split("-").map(Number); const [db, mb, yb] = b.split("-").map(Number);
       return new Date(ya, ma - 1, da) - new Date(yb, mb - 1, db);
     });
     
@@ -231,17 +219,15 @@ module.exports = async function generateExcel(data, filePath, statistics = null)
       wsSchedule.mergeCells(`A${r}:D${r}`);
       const dc = wsSchedule.getCell(`A${r}`);
       dc.value = `${date} (${dayName})`;
-      dc.font = { bold: true, size: 13, name: "Arial", color: { argb: isW ? "FFDC2626" : "FF1F2937" } };
+      dc.font = { bold: true, size: 13, name: "Arial", color: { argb: isW ? "FFDC2626" : COLORS.text_black } };
       dc.fill = { type: "pattern", pattern: "solid", fgColor: { argb: isW ? "FFFEE2E2" : "FFF3F4F6" } };
-      dc.alignment = { horizontal: "left", vertical: "middle" };
-      wsSchedule.getRow(r).height = 22; r++;
+      dc.alignment = { horizontal: "left", vertical: "middle" }; wsSchedule.getRow(r).height = 22; r++;
       
       if (schedule[date]) {
         schedule[date].forEach((slot, si) => {
           wsSchedule.mergeCells(`A${r}:D${r}`);
           wsSchedule.getCell(`A${r}`).value = `  ${dict.duty_slot} ${si + 1}:`;
-          wsSchedule.getCell(`A${r}`).font = { bold: true, size: 12, name: "Arial", color: { argb: "FF374151" } };
-          r++;
+          wsSchedule.getCell(`A${r}`).font = { bold: true, size: 12, name: "Arial", color: { argb: COLORS.text_black } }; r++;
           
           if (slot.persons) {
             slot.persons.forEach(person => {
@@ -250,8 +236,8 @@ module.exports = async function generateExcel(data, filePath, statistics = null)
               const roleText = person.role === "specijalista" ? dict.specialist : dict.resident;
               const rankText = person.rank ? ` [${dict.header_rank} ${person.rank}]` : "";
               cell.value = `    ${person.isChief ? "★ " : "• "}${person.name} — ${roleText} (${person.share})${rankText}${person.isChief ? " — " + dict.chief : ""}`;
-              cell.font = { bold: person.isChief, size: 11, name: "Arial", color: { argb: person.isChief ? "FF059669" : "FF1F2937" } };
-              if (person.isChief) cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF0FDF4" } };
+              cell.font = { bold: person.isChief, size: 11, name: "Arial", color: { argb: person.isChief ? "FF059669" : COLORS.text_black } };
+              if (person.isChief) cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLORS.chief_bg } };
               r++;
             });
           }
@@ -264,10 +250,11 @@ module.exports = async function generateExcel(data, filePath, statistics = null)
   
   wsSchedule.mergeCells(`A${r}:D${r}`);
   wsSchedule.getCell(`A${r}`).value = `© ${dict.footer} | ${dict.generated}: ${genDate.toLocaleDateString("sr-RS")} ${genDate.toLocaleTimeString("sr-RS")}`;
-  wsSchedule.getCell(`A${r}`).font = { size: 7, name: "Arial", color: { argb: "FFD1D5DB" } };
-  wsSchedule.getCell(`A${r}`).alignment = { horizontal: "center" };
+  wsSchedule.getCell(`A${r}`).font = { size: 7, name: "Arial", color: { argb: "FFD1D5DB" } }; wsSchedule.getCell(`A${r}`).alignment = { horizontal: "center" };
   
-  // ===== SHEET 2: TABELARNI PREGLED =====
+  // =====================================================================
+  // SHEET 2: TABELARNI PREGLED
+  // =====================================================================
   const rankedUsed = useRanked1 || useRanked2;
   const extraCols = (hasType2 ? 1 : 0) + (rankedUsed ? 1 : 0);
   const totalCols = 7 + extraCols;
@@ -277,27 +264,20 @@ module.exports = async function generateExcel(data, filePath, statistics = null)
     pageSetup: { orientation: "landscape", paperSize: 9, fitToPage: false, fitToWidth: 0, fitToHeight: 0, margins: { left: 1.5, right: 1.5, top: 1.5, bottom: 1.5 } }
   });
   
-  wsTable.getColumn(1).width = 18;
-  wsTable.getColumn(2).width = 22;
-  wsTable.getColumn(3).width = 22;
-  wsTable.getColumn(4).width = 50;
-  wsTable.getColumn(5).width = 24;
-  wsTable.getColumn(6).width = 20;
-  wsTable.getColumn(7).width = 24;
+  wsTable.getColumn(1).width = 18; wsTable.getColumn(2).width = 22; wsTable.getColumn(3).width = 22;
+  wsTable.getColumn(4).width = 50; wsTable.getColumn(5).width = 24; wsTable.getColumn(6).width = 20; wsTable.getColumn(7).width = 24;
   let colIdx = 8;
-  if (hasType2) { wsTable.getColumn(colIdx).width = 22; colIdx++; }
+  if (hasType2) { wsTable.getColumn(colIdx).width = 24; colIdx++; }
   if (rankedUsed) { wsTable.getColumn(colIdx).width = 12; }
   
   wsTable.mergeCells(`A1:${lastCol}1`);
   wsTable.getCell("A1").value = `${hospital} — ${dict.title}: ${monthName} ${year}`;
-  wsTable.getCell("A1").font = { bold: true, size: 14, name: "Arial", color: { argb: "FF1E3A5F" } };
-  wsTable.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
-  wsTable.getRow(1).height = 30;
+  wsTable.getCell("A1").font = { bold: true, size: 14, name: "Arial", color: { argb: COLORS.text_black } };
+  wsTable.getCell("A1").alignment = { horizontal: "center", vertical: "middle" }; wsTable.getRow(1).height = 30;
   
   wsTable.mergeCells(`A2:${lastCol}2`);
   wsTable.getCell("A2").value = hasType2 ? `${type1Name || "Tip 1"} & ${type2Name || "Tip 2"} | ${dict.footer}` : `${dict.footer}`;
-  wsTable.getCell("A2").font = { size: 9, name: "Arial", color: { argb: "FF6B7280" } };
-  wsTable.getCell("A2").alignment = { horizontal: "center" };
+  wsTable.getCell("A2").font = { size: 9, name: "Arial", color: { argb: "FF6B7280" } }; wsTable.getCell("A2").alignment = { horizontal: "center" };
   
   const headers = [dict.header_date, dict.header_day, dict.header_slot, dict.header_name, dict.header_type, dict.header_share, dict.header_chief];
   if (hasType2) headers.push(dict.header_duty_type);
@@ -306,62 +286,85 @@ module.exports = async function generateExcel(data, filePath, statistics = null)
   const hRow = wsTable.addRow(headers);
   hRow.font = { bold: true, size: 11, name: "Arial", color: { argb: "FFFFFFFF" } };
   hRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF374151" } };
-  hRow.alignment = { horizontal: "center", vertical: "middle" };
-  hRow.height = 25;
+  hRow.alignment = { horizontal: "center", vertical: "middle" }; hRow.height = 25;
+  
+  // Podaci - SAMO PRVI RED SVAKOG DANA IMA SVETLO PLAVU POZADINU
+  let prevDate = "";
   
   for (const date of dates) {
     const [day, m, y] = date.split("-").map(Number);
     const dateObj = new Date(y, m - 1, day);
     const dayName = days[dateObj.getDay() === 0 ? 6 : dateObj.getDay() - 1];
-    const isWeekendDay = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+    const dutyTypeForDate = (dutyTypes && dutyTypes[date]) ? dutyTypes[date] : "";
+    const isNewDate = (date !== prevDate);
     
     if (schedule[date]) {
       schedule[date].forEach((slot, slotIndex) => {
         if (slot.persons) {
-          slot.persons.forEach((person) => {
+          slot.persons.forEach((person, personIndex) => {
             const roleText = person.role === "specijalista" ? dict.specialist : dict.resident;
             const rowData = [
               date, dayName, `${dict.duty_slot} ${slotIndex + 1}`, person.name, roleText, person.share,
               person.isChief ? `★ ${dict.yes}` : dict.no
             ];
-            if (hasType2) rowData.push(dutyTypes[date] || "-");
+            if (hasType2) rowData.push(dutyTypeForDate || "-");
             if (rankedUsed) rowData.push(person.rank || "-");
             
             const row = wsTable.addRow(rowData);
-            if (isWeekendDay) row.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFEF2F2" } };
-            if (person.isChief) { row.font = { bold: true, color: { argb: "FF059669" } }; row.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF0FDF4" } }; }
-            if (person.role === "specijalista" && !person.isChief) row.getCell(5).font = { color: { argb: "FF2563EB" }, bold: true };
+            row.font = { color: { argb: COLORS.text_black } };
+            
+            // SAMO PRVI RED DANA (isNewDate + prvi slot + prva osoba) dobija svetlo plavu pozadinu
+            if (isNewDate && slotIndex === 0 && personIndex === 0) {
+              row.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLORS.first_row_bg } };
+            }
+            
+            // Glavni dežurni uvek bold
+            if (person.isChief) {
+              row.font = { bold: true, color: { argb: COLORS.text_black } };
+            }
+            
+            // Specijalisti koji nisu glavni - plavo bold u koloni Tip
+            if (person.role === "specijalista" && !person.isChief) {
+              row.getCell(5).font = { color: { argb: "FF2563EB" }, bold: true };
+            }
+            
             row.alignment = { vertical: "middle" }; row.height = 20;
           });
         }
       });
     }
+    
+    prevDate = date;
   }
   
+  // Border
   wsTable.eachRow((row, rowNumber) => {
     if (rowNumber <= 3) return;
     row.eachCell((cell) => {
-      cell.border = { top: { style: "thin", color: { argb: "FFD1D5DB" } }, left: { style: "thin", color: { argb: "FFD1D5DB" } }, bottom: { style: "thin", color: { argb: "FFD1D5DB" } }, right: { style: "thin", color: { argb: "FFD1D5DB" } } };
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFD1D5DB" } }, left: { style: "thin", color: { argb: "FFD1D5DB" } },
+        bottom: { style: "thin", color: { argb: "FFD1D5DB" } }, right: { style: "thin", color: { argb: "FFD1D5DB" } }
+      };
     });
   });
   
-  // ===== SHEET 3: STATISTIKA =====
+  // =====================================================================
+  // SHEET 3: STATISTIKA
+  // =====================================================================
   if (statistics && statistics.entries && statistics.entries.length > 0) {
     const wsStats = workbook.addWorksheet(dict.sheet_stats);
     
-    wsStats.getColumn(1).width = 35; wsStats.getColumn(2).width = 18; wsStats.getColumn(3).width = 16;
+    wsStats.getColumn(1).width = 35; wsStats.getColumn(2).width = 18; wsStats.getColumn(3).width = 20;
     wsStats.getColumn(4).width = 20; wsStats.getColumn(5).width = 20; wsStats.getColumn(6).width = 16;
     if (rankedUsed) wsStats.getColumn(7).width = 12;
     
     wsStats.mergeCells("A1:F1");
     wsStats.getCell("A1").value = `${dict.stats_title} — ${hospital}`;
-    wsStats.getCell("A1").font = { bold: true, size: 14, name: "Arial" };
-    wsStats.getCell("A1").alignment = { horizontal: "center" };
+    wsStats.getCell("A1").font = { bold: true, size: 14, name: "Arial", color: { argb: COLORS.text_black } }; wsStats.getCell("A1").alignment = { horizontal: "center" };
     
     wsStats.mergeCells("A2:F2");
     wsStats.getCell("A2").value = `${monthName} ${year} | ${dict.footer} | ${dict.generated}: ${genDate.toLocaleDateString("sr-RS")}`;
-    wsStats.getCell("A2").font = { size: 10, name: "Arial", color: { argb: "FF6B7280" } };
-    wsStats.getCell("A2").alignment = { horizontal: "center" };
+    wsStats.getCell("A2").font = { size: 10, name: "Arial", color: { argb: "FF6B7280" } }; wsStats.getCell("A2").alignment = { horizontal: "center" };
     
     const statHeaders = rankedUsed
       ? [dict.header_name, dict.header_type, dict.stats_load, dict.stats_duties, dict.stats_weekends, dict.header_chief, dict.header_rank]
@@ -369,21 +372,20 @@ module.exports = async function generateExcel(data, filePath, statistics = null)
     
     const sRow = wsStats.addRow(statHeaders);
     sRow.font = { bold: true, size: 11, name: "Arial", color: { argb: "FFFFFFFF" } };
-    sRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF374151" } };
-    sRow.alignment = { horizontal: "center", vertical: "middle" };
+    sRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF374151" } }; sRow.alignment = { horizontal: "center", vertical: "middle" };
     
-    [...statistics.entries].sort((a, b) => b.totalAssignedShare - a.totalAssignedShare).forEach((entry) => {
+    const sortedEntries = [...statistics.entries].sort((a, b) => (b.totalAssignedShare || 0) - (a.totalAssignedShare || 0));
+    const maxLoad = Math.max(...sortedEntries.map(e => e.totalAssignedShare || 0), 1);
+    
+    sortedEntries.forEach((entry) => {
       const roleText = entry.role === "specijalista" ? dict.specialist : dict.resident;
-      const rowData = [
-        entry.name, roleText, entry.totalAssignedShare.toFixed(2),
-        entry.dutyCount || entry.assignedDates.length, entry.weekendCount,
-        entry.canBeChief ? dict.yes : dict.no
-      ];
+      const rowData = [entry.name, roleText, (entry.totalAssignedShare || 0).toFixed(2), entry.dutyCount || entry.assignedDates?.length || 0, entry.weekendCount || 0, entry.canBeChief ? dict.yes : dict.no];
       if (rankedUsed) rowData.push(entry.rank || "-");
       
       const row = wsStats.addRow(rowData);
-      if (entry.totalAssignedShare > 0) {
-        const intensity = Math.min(Math.round(entry.totalAssignedShare * 30), 200);
+      row.font = { color: { argb: COLORS.text_black } };
+      if ((entry.totalAssignedShare || 0) > 0) {
+        const intensity = Math.min(Math.round(((entry.totalAssignedShare || 0) / maxLoad) * 200), 200);
         const green = (255 - intensity).toString(16).padStart(2, '0');
         row.fill = { type: "pattern", pattern: "solid", fgColor: { argb: `FF${green}FF${green}` } };
       }

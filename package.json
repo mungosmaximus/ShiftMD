@@ -1,8 +1,8 @@
 {
-  "name": "shiftmd-v3.5",
-  "version": "3.5.0",
+  "name": "shiftmd-v3.6",
+  "version": "3.6.0",
   "private": true,
-  "description": "ShiftMD - Dvojezični sistem za raspored dežurstava lekara sa naprednim scoringom, burnout zaštitom i rangiranim timovima",
+  "description": "ShiftMD - Dvojezični sistem za raspored dežurstava sa dva tipa dežurstava i rangiranim timovima",
   "scripts": {
     "start": "node server.js",
     "cleanup": "node cleanup.js"
