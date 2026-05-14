@@ -1,17 +1,19 @@
-// ShiftMD v3.6 - Dvojezični Excel parser sa podrškom za rangove i robustnim parsiranjem datuma
+// ShiftMD v3.6 - Dvojezični Excel parser sa podrškom za rangove i opsege datuma
 const ExcelJS = require("exceljs");
 const { parseDateList } = require("./utils");
 
-console.log("✅ ShiftMD v3.6 - Dvojezični Excel parser (sa rangovima i popravljenim datumima)");
+console.log("✅ ShiftMD v3.6 - Dvojezični Excel parser (sa rangovima i opsezima datuma)");
 
 const HEADER_MAP = {
   "ime i prezime": "name", "full name": "name", "name": "name",
-  "starešinstvo": "seniority", "seniority": "seniority", "senioritet": "seniority", "years of experience": "seniority", "experience": "seniority",
+  "starešinstvo": "seniority", "seniority": "seniority", "senioritet": "seniority",
+  "years of experience": "seniority", "experience": "seniority",
   "može biti glavni": "canBeChief", "can be chief": "canBeChief", "glavni": "canBeChief", "chief": "canBeChief",
   "tip zaposlenog": "role", "employee type": "role", "role": "role", "position": "role", "tip": "role", "type": "role",
   "udeo dežurstva": "share", "duty share": "share", "share": "share", "udeo": "share",
   "ne može": "unavailable", "unavailable": "unavailable", "ne moze": "unavailable", "cannot work": "unavailable",
-  "želi da dežura": "preferred", "preferred": "preferred", "želi": "preferred", "wants to work": "preferred", "wishes": "preferred", "zeli da dezura": "preferred",
+  "želi da dežura": "preferred", "preferred": "preferred", "želi": "preferred", "wants to work": "preferred",
+  "wishes": "preferred", "zeli da dezura": "preferred",
   "rang": "rank", "rank": "rank", "redni broj": "rank", "order": "rank", "priority": "rank", "nivo": "rank", "level": "rank"
 };
 
@@ -26,85 +28,50 @@ const SHARE_MAP = {
 };
 
 /**
- * Konvertuje bilo koju vrednost datuma u string formata DD-MM-YYYY
- * Podržava: Date objekte, Excel serijske brojeve, stringove u raznim formatima
- */
-function parseDateValue(value) {
-  if (value === null || value === undefined || value === '') return '';
-  
-  // 1. Ako je već string u formatu DD-MM-YYYY
-  if (typeof value === 'string') {
-    const trimmed = value.trim();
-    
-    // Proveri da li je već u formatu DD-MM-YYYY ili DD-MM-YYYY HH:MM:SS
-    const dateRegex = /^(\d{2})-(\d{2})-(\d{4})/;
-    if (dateRegex.test(trimmed)) {
-      return trimmed.substring(0, 10); // Uzmi samo DD-MM-YYYY deo
-    }
-    
-    // Proveri da li je u formatu YYYY-MM-DD ili YYYY-MM-DD HH:MM:SS (ISO format)
-    const isoRegex = /^(\d{4})-(\d{2})-(\d{2})/;
-    const isoMatch = trimmed.match(isoRegex);
-    if (isoMatch) {
-      const [, y, m, d] = isoMatch;
-      return `${d}-${m}-${y}`;
-    }
-    
-    // Proveri da li je u formatu MM/DD/YYYY (US format)
-    const usRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/;
-    const usMatch = trimmed.match(usRegex);
-    if (usMatch) {
-      const [, m, d, y] = usMatch;
-      return `${d.padStart(2, '0')}-${m.padStart(2, '0')}-${y}`;
-    }
-    
-    // Ako je običan broj (Excel serijski broj)
-    const numVal = Number(trimmed);
-    if (!isNaN(numVal) && numVal > 40000 && numVal < 60000) {
-      return excelSerialToDate(numVal);
-    }
-    
-    return trimmed;
-  }
-  
-  // 2. Ako je Date objekat
-  if (value instanceof Date) {
-    const d = value.getDate().toString().padStart(2, '0');
-    const m = (value.getMonth() + 1).toString().padStart(2, '0');
-    const y = value.getFullYear();
-    return `${d}-${m}-${y}`;
-  }
-  
-  // 3. Ako je broj (Excel serijski broj datuma)
-  if (typeof value === 'number') {
-    if (value > 40000 && value < 60000) {
-      return excelSerialToDate(value);
-    }
-    return value.toString();
-  }
-  
-  // 4. Ako je objekat sa richText
-  if (value && typeof value === 'object' && value.richText) {
-    const text = value.richText.map(t => t.text).join('');
-    return parseDateValue(text); // Rekurzivno parsiraj
-  }
-  
-  return String(value).trim();
-}
-
-/**
  * Konvertuje Excel serijski broj u datum DD-MM-YYYY
  */
 function excelSerialToDate(serial) {
-  // Excel datum počinje od 1. januara 1900. (serijski broj 1)
-  // Postoji bug: Excel misli da 1900. godina ima 29. februar
-  const excelEpoch = new Date(1899, 11, 30); // 30. decembar 1899.
+  const excelEpoch = new Date(1899, 11, 30);
   const date = new Date(excelEpoch.getTime() + serial * 86400000);
-  
   const d = date.getDate().toString().padStart(2, '0');
   const m = (date.getMonth() + 1).toString().padStart(2, '0');
   const y = date.getFullYear();
   return `${d}-${m}-${y}`;
+}
+
+/**
+ * Konvertuje vrednost ćelije u string.
+ * Date objekti i Excel serijski brojevi se konvertuju u DD-MM-YYYY.
+ * Stringovi se vraćaju NETAKNUTI (mogu sadržati opsege sa "do"/"to").
+ */
+function cellValueToString(cellValue) {
+  if (cellValue === null || cellValue === undefined) {
+    return '';
+  }
+
+  // Date objekat → DD-MM-YYYY
+  if (cellValue instanceof Date) {
+    const d = cellValue.getDate().toString().padStart(2, '0');
+    const m = (cellValue.getMonth() + 1).toString().padStart(2, '0');
+    const y = cellValue.getFullYear();
+    return `${d}-${m}-${y}`;
+  }
+
+  // Broj → proveri da li je Excel serijski broj datuma
+  if (typeof cellValue === 'number') {
+    if (cellValue > 40000 && cellValue < 60000) {
+      return excelSerialToDate(cellValue);
+    }
+    return cellValue.toString();
+  }
+
+  // Rich text → običan tekst
+  if (cellValue && typeof cellValue === 'object' && cellValue.richText) {
+    return cellValue.richText.map(t => t.text).join('');
+  }
+
+  // String → vrati ga NETAKNUTOG (može sadržati "DD-MM-YYYY do DD-MM-YYYY")
+  return String(cellValue).trim();
 }
 
 module.exports = async function parseExcel(path) {
@@ -153,34 +120,8 @@ module.exports = async function parseExcel(path) {
         const fieldKey = columnMap[colNumber];
         if (!fieldKey) return;
         
-        let cellValue = cell.value;
-        
-        // Konvertuj datume i brojeve u string
-        if (cellValue instanceof Date) {
-          const d = cellValue.getDate().toString().padStart(2, '0');
-          const m = (cellValue.getMonth() + 1).toString().padStart(2, '0');
-          const y = cellValue.getFullYear();
-          cellValue = `${d}-${m}-${y}`;
-        } else if (typeof cellValue === 'number') {
-          // Proveri da li je Excel serijski broj datuma
-          if (cellValue > 40000 && cellValue < 60000) {
-            cellValue = excelSerialToDate(cellValue);
-          } else {
-            cellValue = cellValue.toString();
-          }
-        } else if (cellValue && typeof cellValue === 'object' && cellValue.richText) {
-          cellValue = cellValue.richText.map(t => t.text).join('');
-        } else if (cellValue === null || cellValue === undefined) {
-          cellValue = '';
-        } else {
-          cellValue = String(cellValue).trim();
-        }
-        
-        // Za kolone sa datumima (unavailable, preferred) - dodatna obrada
-        if (fieldKey === 'unavailable' || fieldKey === 'preferred') {
-          cellValue = parseDateValue(cellValue);
-        }
-        
+        // Konvertuj vrednost ćelije u string (čuvajući opsege!)
+        const cellValue = cellValueToString(cell.value);
         rowData[fieldKey] = cellValue;
       });
       
@@ -193,33 +134,51 @@ module.exports = async function parseExcel(path) {
     
     return rows.map((row, index) => {
       const lineNum = index + 2;
-      if (!row.name) throw new Error(`Red ${lineNum}: Nedostaje ime / Missing name.`);
       
+      // Validacija imena
+      if (!row.name) {
+        throw new Error(`Red ${lineNum}: Nedostaje ime / Missing name.`);
+      }
+      
+      // Validacija starešinstva
       const seniority = Number(row.seniority);
-      if (isNaN(seniority)) throw new Error(`Red ${lineNum}: Neispravno starešinstvo "${row.seniority}" za ${row.name}.`);
+      if (isNaN(seniority)) {
+        throw new Error(`Red ${lineNum}: Neispravno starešinstvo "${row.seniority}" za ${row.name}. / Invalid seniority.`);
+      }
       
+      // Validacija "Može biti glavni"
       const canBeChiefRaw = String(row.canBeChief || '').toLowerCase().trim();
       const canBeChief = CHIEF_VALUES.some(v => canBeChiefRaw === v);
       
+      // Validacija "Tip zaposlenog"
       const roleRaw = String(row.role || '').toLowerCase().trim();
       let role;
-      if (ROLE_SPECIALIST.some(r => roleRaw.includes(r))) role = "specijalista";
-      else if (ROLE_RESIDENT.some(r => roleRaw.includes(r))) role = "specijalizant";
-      else throw new Error(`Red ${lineNum}: Neispravan tip zaposlenog "${row.role}" za ${row.name}.`);
+      if (ROLE_SPECIALIST.some(r => roleRaw.includes(r))) {
+        role = "specijalista";
+      } else if (ROLE_RESIDENT.some(r => roleRaw.includes(r))) {
+        role = "specijalizant";
+      } else {
+        throw new Error(`Red ${lineNum}: Neispravan tip zaposlenog "${row.role}" za ${row.name}. / Invalid employee type.`);
+      }
       
+      // Validacija "Udeo dežurstva"
       const shareRaw = String(row.share || '').toLowerCase().trim();
       const mappedShare = SHARE_MAP[shareRaw];
-      if (!mappedShare) throw new Error(`Red ${lineNum}: Neispravan udeo dežurstva "${row.share}" za ${row.name}.`);
+      if (!mappedShare) {
+        throw new Error(`Red ${lineNum}: Neispravan udeo dežurstva "${row.share}" za ${row.name}. / Invalid duty share.`);
+      }
       
+      // Parsiraj rang
       const rank = row.rank ? parseInt(row.rank) || 0 : 0;
       
-      // Parsiraj datume koristeći parseDateList iz utils
+      // Parsiraj datume koristeći parseDateList iz utils.js
+      // parseDateList sada podržava opsege: "DD-MM-YYYY do DD-MM-YYYY"
       const unavailableDates = parseDateList(row.unavailable || '');
       const preferredDates = parseDateList(row.preferred || '');
       
       console.log(`   👨‍⚕️ ${row.name}: ${role}, udeo=${mappedShare}, glavni=${canBeChief ? 'DA' : 'NE'}, rang=${rank || '-'}`);
-      if (unavailableDates.length > 0) console.log(`      Ne može: ${unavailableDates.join(', ')}`);
-      if (preferredDates.length > 0) console.log(`      Želi: ${preferredDates.join(', ')}`);
+      if (unavailableDates.length > 0) console.log(`      Ne može: ${unavailableDates.length} datuma`);
+      if (preferredDates.length > 0) console.log(`      Želi: ${preferredDates.length} datuma`);
       
       return {
         name: row.name,

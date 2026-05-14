@@ -34,11 +34,11 @@
         <thead><tr><th data-key="guide_table_header_col">Kolona</th><th data-key="guide_table_header_required">Obavezno</th><th data-key="guide_table_header_desc">Opis</th><th data-key="guide_table_header_values">Dozvoljene vrednosti</th></tr></thead>
         <tbody>
           <tr><td><strong>Ime i prezime / Full Name</strong></td><td>✅</td><td data-key="guide_col_name_desc">Puno ime</td><td data-key="guide_col_name_values">Bilo koji tekst</td></tr>
-          <tr><td><strong>Starešinstvo / Seniority</strong></td><td>✅</td><td data-key="guide_col_seniority_desc">Arbitrarna vrednost 1-15. Manji broj = veći prioritet</td><td data-key="guide_col_seniority_values">Broj od 1 do 15</td></tr>
+          <tr><td><strong>Starešinstvo / Seniority</strong></td><td>✅</td><td data-key="guide_col_seniority_desc">Arbitrarna vrednost 1-15</td><td data-key="guide_col_seniority_values">Broj od 1 do 15</td></tr>
           <tr><td><strong>Može biti glavni / Can be Chief</strong></td><td>✅</td><td data-key="guide_col_chief_desc">Glavni dežurni?</td><td data-key="guide_col_chief_values">DA/YES ili NE/NO</td></tr>
           <tr><td><strong>Tip zaposlenog / Employee Type</strong></td><td>✅</td><td data-key="guide_col_role_desc">Vrsta lekara</td><td data-key="guide_col_role_values">specijalista/specialist ili specijalizant/resident</td></tr>
           <tr><td><strong>Udeo dežurstva / Duty Share</strong></td><td>✅</td><td data-key="guide_col_share_desc">Koliki deo</td><td data-key="guide_col_share_values">celo/full, polovina/half, trećina/third, četvrtina/quarter, osmina/eighth</td></tr>
-          <tr><td><strong>Ne može / Unavailable</strong></td><td>❌</td><td data-key="guide_col_unavailable_desc">Ne može da dežura</td><td data-key="guide_col_unavailable_values">Npr. 05-06-2026</td></tr>
+          <tr><td><strong>Ne može / Unavailable</strong></td><td>❌</td><td data-key="guide_col_unavailable_desc">Datumi kada lekar NE MOŽE da dežura. Pojedinačni datumi ili opsezi.</td><td data-key="guide_col_unavailable_values">Npr. 05-06-2026, 22-03-2026 do 28-03-2026</td></tr>
           <tr><td><strong>Želi da dežura / Preferred</strong></td><td>❌</td><td data-key="guide_col_preferred_desc">Želi da dežura</td><td data-key="guide_col_preferred_values">Npr. 01-06-2026</td></tr>
           <tr><td><strong>Rang / Rank</strong></td><td>⚠️</td><td data-key="guide_col_rank_desc">Redni broj u timu</td><td data-key="guide_col_rank_values">1, 2, 3...</td></tr>
         </tbody>
@@ -50,10 +50,10 @@
           <li data-key="guide_warning_1">Sve kolone obavezne osim "Ne može", "Želi" i "Rang"</li>
           <li data-key="guide_warning_2">Datumi u formatu DD-MM-GGGG</li>
           <li data-key="guide_warning_3">Za udeo koristite tekstualne oznake</li>
-          <li data-key="guide_warning_4">Ne koristite razlomke!</li>
+          <li data-key="guide_warning_4">Ne koristite razlomke (1/1, 1/2)!</li>
           <li data-key="guide_warning_5">Samo specijalisti mogu biti glavni</li>
           <li data-key="guide_warning_6">'Rang' samo za rangirane timove</li>
-          <li data-key="guide_warning_7">Starešinstvo je arbitrarna vrednost 1-15, ne godine staža</li>
+          <li data-key="guide_warning_7">Opsezi datuma: DD-MM-GGGG do DD-MM-GGGG (npr. 22-03-2026 do 28-03-2026). Može i 'to' za engleski.</li>
         </ul>
       </div>
 

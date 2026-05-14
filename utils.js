@@ -2,49 +2,68 @@ function parseDateList(cell) {
   if (!cell) return [];
   if (typeof cell !== 'string') return [];
   
-  // Podeli po zarezu, tačka-zarezu ili razmaku
-  return cell.split(/[,;]+/)
-    .map(v => v.trim())
-    .filter(v => v.length > 0)
-    .map(v => {
-      // Ako je već u formatu DD-MM-YYYY, ostavi kako jeste
-      if (/^\d{2}-\d{2}-\d{4}$/.test(v)) return v;
-      
-      // Ako je u formatu YYYY-MM-DD ili YYYY-MM-DD HH:MM:SS, konvertuj u DD-MM-YYYY
-      const isoMatch = v.match(/^(\d{4})-(\d{2})-(\d{2})/);
-      if (isoMatch) {
-        const [, y, m, d] = isoMatch;
-        return `${d}-${m}-${y}`;
-      }
-      
-      // Ako je u formatu DD/MM/YYYY, konvertuj u DD-MM-YYYY
-      const slashMatch = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-      if (slashMatch) {
-        const [, d, m, y] = slashMatch;
-        return `${d.padStart(2, '0')}-${m.padStart(2, '0')}-${y}`;
-      }
-      
-      // Ako je u formatu MM/DD/YYYY (US), konvertuj u DD-MM-YYYY
-      const usMatch = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-      if (usMatch) {
-        const [, m, d, y] = usMatch;
-        return `${d.padStart(2, '0')}-${m.padStart(2, '0')}-${y}`;
-      }
-      
-      // Ako je samo broj (Excel serijski), pokušaj konverziju
-      const numVal = Number(v);
-      if (!isNaN(numVal) && numVal > 40000 && numVal < 60000) {
-        const excelEpoch = new Date(1899, 11, 30);
-        const date = new Date(excelEpoch.getTime() + numVal * 86400000);
-        const d = date.getDate().toString().padStart(2, '0');
-        const m = (date.getMonth() + 1).toString().padStart(2, '0');
-        const y = date.getFullYear();
-        return `${d}-${m}-${y}`;
-      }
-      
-      // Vrati original ako ništa ne odgovara
-      return v;
-    });
+  const dates = [];
+  
+  // Prvo podeli po zarezu
+  const parts = cell.split(',').map(p => p.trim()).filter(p => p.length > 0);
+  
+  for (const part of parts) {
+    // Proveri da li je opseg sa "do" (srpski)
+    let rangeMatch = part.match(/^(\d{2}-\d{2}-\d{4})\s+do\s+(\d{2}-\d{2}-\d{4})$/i);
+    
+    // Proveri da li je opseg sa "to" (engleski)
+    if (!rangeMatch) {
+      rangeMatch = part.match(/^(\d{2}-\d{2}-\d{4})\s+to\s+(\d{2}-\d{2}-\d{4})$/i);
+    }
+    
+    if (rangeMatch) {
+      // Proširi opseg u niz pojedinačnih datuma
+      const expandedDates = expandDateRange(rangeMatch[1], rangeMatch[2]);
+      dates.push(...expandedDates);
+      console.log(`      📅 Opseg: ${rangeMatch[1]} do ${rangeMatch[2]} → ${expandedDates.length} datuma`);
+      continue;
+    }
+    
+    // Ako nije opseg, dodaj kao pojedinačni datum
+    if (/^\d{2}-\d{2}-\d{4}$/.test(part)) {
+      dates.push(part);
+    }
+  }
+  
+  // Ukloni duplikate i sortiraj
+  return [...new Set(dates)].sort((a, b) => {
+    const [da, ma, ya] = a.split("-").map(Number);
+    const [db, mb, yb] = b.split("-").map(Number);
+    return new Date(ya, ma - 1, da) - new Date(yb, mb - 1, db);
+  });
+}
+
+/**
+ * Proširuje opseg datuma u niz pojedinačnih datuma
+ */
+function expandDateRange(startStr, endStr) {
+  const [ds, ms, ys] = startStr.split("-").map(Number);
+  const [de, me, ye] = endStr.split("-").map(Number);
+  
+  const start = new Date(ys, ms - 1, ds);
+  const end = new Date(ye, me - 1, de);
+  
+  if (start > end) {
+    throw new Error(`Početni datum (${startStr}) je posle krajnjeg datuma (${endStr}).`);
+  }
+  
+  const dates = [];
+  const current = new Date(start);
+  
+  while (current <= end) {
+    const d = current.getDate().toString().padStart(2, '0');
+    const m = (current.getMonth() + 1).toString().padStart(2, '0');
+    const y = current.getFullYear();
+    dates.push(`${d}-${m}-${y}`);
+    current.setDate(current.getDate() + 1);
+  }
+  
+  return dates;
 }
 
 function shareToNumber(share) {
@@ -61,7 +80,6 @@ function shareToNumber(share) {
     return result;
   }
   
-  // Fallback za stare vrednosti
   const fallbackMap = {
     "1/1": 1, "1": 1,
     "1/2": 0.5, "0.5": 0.5,
@@ -90,7 +108,6 @@ function shareToString(share) {
   if (rounded >= 0.249 && rounded <= 0.251) return "četvrtina";
   if (rounded >= 0.124 && rounded <= 0.126) return "osmina";
   
-  // Kombinovane vrednosti koje nastaju odsecanjem
   if (rounded >= 0.874 && rounded <= 0.876) return "celo bez osmine";
   if (rounded >= 0.749 && rounded <= 0.751) return "tri četvrtine";
   if (rounded >= 0.666 && rounded <= 0.668) return "dve trećine";
@@ -114,4 +131,4 @@ function isWeekend(dateStr) {
   return date.getDay() === 0 || date.getDay() === 6;
 }
 
-module.exports = { parseDateList, shareToNumber, shareToString, isWeekend };
+module.exports = { parseDateList, shareToNumber, shareToString, isWeekend, expandDateRange };
